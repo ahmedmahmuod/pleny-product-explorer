@@ -1,0 +1,49 @@
+<div class="select-field">
+  <label class="select-field__label" [for]="controlId()">
+    {{ label() }}
+    @if (required()) {
+      <span class="select-field__required" aria-hidden="true">*</span>
+    }
+  </label>
+
+  <select
+    class="select-field__control"
+    [id]="controlId()"
+    [attr.name]="name()"
+    [value]="value()"
+    [required]="required()"
+    [disabled]="interactionDisabled()"
+    [attr.aria-busy]="loading() ? 'true' : null"
+    [attr.aria-invalid]="error() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (change)="updateValue($event)"
+  >
+    @if (placeholder()) {
+      <option value="" [disabled]="required()">
+        {{ placeholder() }}
+      </option>
+    }
+
+    @for (option of options(); track option.value) {
+      <option [value]="option.value" [disabled]="option.disabled ?? false">
+        {{ option.label }}
+      </option>
+    }
+  </select>
+
+  @if (error()) {
+    <p class="select-field__message select-field__message--error" [id]="errorId()" role="alert">
+      {{ error() }}
+    </p>
+  } @else if (hint()) {
+    <p class="select-field__message" [id]="hintId()">
+      {{ hint() }}
+    </p>
+  }
+</div>
+
+@if (loading()) {
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
+    {{ loadingLabel() }}
+  </span>
+}
