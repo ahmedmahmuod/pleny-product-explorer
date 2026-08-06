@@ -1,0 +1,23 @@
+<button
+  class="button"
+  [attr.data-variant]="variant()"
+  [attr.data-size]="size()"
+  [attr.data-loading]="loading() ? '' : null"
+  [attr.type]="type()"
+  [attr.aria-busy]="loading() ? 'true' : null"
+  [disabled]="interactionDisabled()"
+>
+  <span class="button__label">
+    <ng-content />
+  </span>
+
+  @if (loading()) {
+    <span class="button__spinner" aria-hidden="true"></span>
+  }
+</button>
+
+@if (loading()) {
+  <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
+    {{ loadingLabel() }}
+  </span>
+}
