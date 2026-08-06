@@ -1,0 +1,61 @@
+:host {
+  display: block;
+}
+
+.text-field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.text-field__label {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+}
+
+.text-field__required {
+  color: var(--color-danger);
+}
+
+.text-field__control {
+  width: 100%;
+  min-height: var(--control-height-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding-inline: var(--space-3);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+
+  &::placeholder {
+    color: var(--color-text-subtle);
+  }
+
+  &:hover:not(:disabled):not([aria-invalid='true']) {
+    border-color: var(--color-border-strong);
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--color-danger);
+  }
+
+  &:disabled {
+    border-color: var(--color-disabled-surface);
+    background: var(--color-disabled-surface);
+    color: var(--color-disabled-text);
+  }
+}
+
+.text-field__message {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-body);
+}
+
+.text-field__message--error {
+  color: var(--color-danger);
+}

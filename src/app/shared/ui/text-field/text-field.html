@@ -1,0 +1,33 @@
+<div class="text-field">
+  <label class="text-field__label" [for]="controlId()">
+    {{ label() }}
+    @if (required()) {
+      <span class="text-field__required" aria-hidden="true">*</span>
+    }
+  </label>
+
+  <input
+    class="text-field__control"
+    [id]="controlId()"
+    [attr.name]="name()"
+    [type]="type()"
+    [attr.autocomplete]="autocomplete()"
+    [attr.placeholder]="placeholder()"
+    [value]="value()"
+    [required]="required()"
+    [disabled]="disabled()"
+    [attr.aria-invalid]="error() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (input)="updateValue($event)"
+  />
+
+  @if (error()) {
+    <p class="text-field__message text-field__message--error" [id]="errorId()" role="alert">
+      {{ error() }}
+    </p>
+  } @else if (hint()) {
+    <p class="text-field__message" [id]="hintId()">
+      {{ hint() }}
+    </p>
+  }
+</div>
