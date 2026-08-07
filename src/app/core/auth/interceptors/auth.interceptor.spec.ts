@@ -11,7 +11,7 @@ import { Observable, of } from 'rxjs';
 
 import { API_BASE_URL } from '../../config/api.config';
 import { AuthRefreshCoordinator } from '../services/auth-refresh-coordinator.service';
-import { AuthStore } from '../stores/auth.store';
+import { AuthStore } from '../data-access/auth.store';
 import { authInterceptor } from './auth.interceptor';
 
 class AuthStoreStub {

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
-import { AuthStore } from '../stores/auth.store';
+import { AuthStore } from '../data-access/auth.store';
 import { getSafeAuthReturnUrl } from '../utils/auth-return-url';
 import { authGuard } from './auth.guard';
 

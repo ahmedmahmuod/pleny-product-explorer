@@ -6,7 +6,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 
 import { routes } from '../../../../app.routes';
 import { AuthCredentials } from '../../../../core/auth/models/auth.models';
-import { AuthStore } from '../../../../core/auth/stores/auth.store';
+import { AuthStore } from '../../../../core/auth/data-access/auth.store';
 import { AppLayout } from '../../../../core/layout/app-layout/app-layout';
 import { LoginPage } from './login';
 

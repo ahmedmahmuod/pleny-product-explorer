@@ -12,7 +12,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, EMPTY, exhaustMap, finalize, pipe, tap } from 'rxjs';
 
 import { AuthCredentials, AuthSession, AuthTokens } from '../models/auth.models';
-import { AuthApiService } from '../services/auth-api.service';
+import { AuthApiService } from './auth-api.service';
 import { AuthSessionStorage } from '../contracts/auth-session-storage';
 
 type AuthStatus = 'idle' | 'loading';
