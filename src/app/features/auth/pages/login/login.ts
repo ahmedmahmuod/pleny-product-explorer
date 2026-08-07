@@ -16,11 +16,11 @@ import {
   validate,
 } from '@angular/forms/signals';
 import { Router } from '@angular/router';
-import { AuthStore } from '../../../core/auth/stores/auth.store';
-import { getSafeAuthReturnUrl } from '../../../core/auth/utils/auth-return-url';
-import { Button } from '../../../shared/ui/button/button';
-import { TextField } from '../../../shared/ui/text-field/text-field';
-import { AuthCredentials } from '../../../core/auth/models/auth.models';
+import { AuthCredentials } from '../../../../core/auth/models/auth.models';
+import { AuthStore } from '../../../../core/auth/stores/auth.store';
+import { getSafeAuthReturnUrl } from '../../../../core/auth/utils/auth-return-url';
+import { Button } from '../../../../shared/ui/button/button';
+import { TextField } from '../../../../shared/ui/text-field/text-field';
 
 @Component({
   selector: 'app-login-page',

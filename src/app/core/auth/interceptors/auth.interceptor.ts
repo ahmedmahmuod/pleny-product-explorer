@@ -14,7 +14,8 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const apiBaseUrl = inject(API_BASE_URL).replace(/\/+$/, '');
   const requestUrl = request.url.split('?')[0].replace(/\/+$/, '');
   const isApiRequest = request.url === apiBaseUrl || request.url.startsWith(`${apiBaseUrl}/`);
-  const isAuthRequest = requestUrl === `${apiBaseUrl}/auth/login` || requestUrl === `${apiBaseUrl}/auth/refresh`;
+  const isAuthRequest =
+    requestUrl === `${apiBaseUrl}/auth/login` || requestUrl === `${apiBaseUrl}/auth/refresh`;
 
   if (!isApiRequest || isAuthRequest) {
     return next(request);

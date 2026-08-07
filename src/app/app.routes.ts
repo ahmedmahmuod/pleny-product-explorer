@@ -9,7 +9,7 @@ export const routes: Routes = [
       {
         path: 'login',
         loadComponent: () =>
-          import('./features/auth/login/login').then(({ LoginPage }) => LoginPage),
+          import('./features/auth/pages/login/login').then(({ LoginPage }) => LoginPage),
       },
       { path: '', pathMatch: 'full', redirectTo: 'login' },
     ],

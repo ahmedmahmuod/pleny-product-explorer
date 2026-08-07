@@ -30,7 +30,12 @@
       [error]="passwordError()"
     />
 
-    <app-button type="submit" size="large" [loading]="authStore.isLoading()" loadingLabel="Signing in">
+    <app-button
+      type="submit"
+      size="large"
+      [loading]="authStore.isLoading()"
+      loadingLabel="Signing in"
+    >
       Sign in
     </app-button>
   </form>

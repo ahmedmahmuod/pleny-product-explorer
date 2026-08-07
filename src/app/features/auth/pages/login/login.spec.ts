@@ -4,10 +4,10 @@ import { By } from '@angular/platform-browser';
 import { provideRouter, Router, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
-import { routes } from '../../../app.routes';
-import { AuthCredentials } from '../../../core/auth/models/auth.models';
-import { AuthStore } from '../../../core/auth/stores/auth.store';
-import { AppLayout } from '../../../core/layout/app-layout/app-layout';
+import { routes } from '../../../../app.routes';
+import { AuthCredentials } from '../../../../core/auth/models/auth.models';
+import { AuthStore } from '../../../../core/auth/stores/auth.store';
+import { AppLayout } from '../../../../core/layout/app-layout/app-layout';
 import { LoginPage } from './login';
 
 class AuthStoreStub {
