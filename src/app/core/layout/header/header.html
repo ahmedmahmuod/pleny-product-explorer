@@ -1,18 +1,27 @@
 <header>
   <nav aria-label="Primary navigation">
     <div class="navigation-start">
-      <a class="brand" routerLink="/products" aria-label="ClickTik home">
+      <a class="brand" routerLink="/home" aria-label="ClickTik home">
         <img class="brand-logo" src="assets/images/logo.png" alt="" width="32" height="32" />
         <span>ClickTik</span>
       </a>
 
       <a
         class="nav-link home-link"
-        routerLink="/products"
+        routerLink="/home"
         routerLinkActive="nav-link--active"
         ariaCurrentWhenActive="page"
       >
         Home
+      </a>
+
+      <a
+        class="nav-link products-link"
+        routerLink="/products"
+        routerLinkActive="nav-link--active"
+        ariaCurrentWhenActive="page"
+      >
+        Products
       </a>
     </div>
 

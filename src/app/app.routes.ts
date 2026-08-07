@@ -14,6 +14,11 @@ export const routes: Routes = [
           import('./features/auth/pages/login/login').then(({ LoginPage }) => LoginPage),
       },
       {
+        path: 'home',
+        loadComponent: () =>
+          import('./features/home/home').then(({ HomePage }) => HomePage),
+      },
+      {
         path: 'products',
         canActivate: [authGuard],
         loadComponent: () =>
@@ -21,7 +26,7 @@ export const routes: Routes = [
             ({ ProductsPage }) => ProductsPage,
           ),
       },
-      { path: '', pathMatch: 'full', redirectTo: 'products' },
+      { path: '', pathMatch: 'full', redirectTo: 'home' },
     ],
   },
 ];

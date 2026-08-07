@@ -46,6 +46,7 @@ describe('AppHeader', () => {
       imports: [AppHeader],
       providers: [
         provideRouter([
+          { path: 'home', component: EmptyRoutePage },
           { path: 'products', component: EmptyRoutePage },
           { path: 'login', component: EmptyRoutePage },
         ]),
@@ -62,6 +63,8 @@ describe('AppHeader', () => {
   it('shows login and hides authenticated actions for a signed-out user', () => {
     const element = fixture.nativeElement as HTMLElement;
 
+    expect(element.querySelector('.home-link')?.textContent).toContain('Home');
+    expect(element.querySelector('.products-link')?.textContent).toContain('Products');
     expect(element.querySelector('a[href="/login"]')?.textContent).toContain('Log in');
     expect(element.querySelector('input[type="search"]')).toBeNull();
     expect(element.querySelector('app-cart-badge')).toBeNull();
