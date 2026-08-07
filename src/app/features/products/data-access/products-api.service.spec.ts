@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { API_BASE_URL } from '../../../core/config/api.config';
-import { ProductCategory, ProductsResponse } from '../models/product.models';
+import { Product, ProductCategory, ProductsResponse } from '../models/product.models';
 import { ProductsApiService } from './products-api.service';
 
 describe('ProductsApiService', () => {
@@ -80,7 +80,7 @@ describe('ProductsApiService', () => {
     request.flush({ ...response, skip: 9 });
   });
 
-  it('loads typed category metadata', () => {
+  it('enriches typed category metadata with product counts', () => {
     const categories: readonly ProductCategory[] = [
       {
         slug: 'smartphones',
@@ -97,6 +97,54 @@ describe('ProductsApiService', () => {
 
     request.flush(categories);
 
+    const countRequest = httpTesting.expectOne(
+      (candidate) => candidate.url === 'https://api.example.test/products',
+    );
+    expect(countRequest.request.params.get('limit')).toBe('0');
+    expect(countRequest.request.params.get('skip')).toBe('0');
+
+    countRequest.flush({
+      products: [createProduct(1, 'smartphones'), createProduct(2, 'smartphones')],
+      total: 2,
+      skip: 0,
+      limit: 0,
+    });
+
+    expect(actual).toEqual([{ ...categories[0], count: 2 }]);
+  });
+
+  it('keeps category metadata when count enrichment fails', () => {
+    const categories: readonly ProductCategory[] = [
+      {
+        slug: 'smartphones',
+        name: 'Smartphones',
+        url: 'https://api.example.test/products/category/smartphones',
+      },
+    ];
+    let actual: readonly ProductCategory[] | undefined;
+
+    service.getCategories().subscribe((value) => (actual = value));
+    httpTesting.expectOne('https://api.example.test/products/categories').flush(categories);
+    httpTesting
+      .expectOne((candidate) => candidate.url === 'https://api.example.test/products')
+      .flush('offline', { status: 503, statusText: 'Unavailable' });
+
     expect(actual).toEqual(categories);
   });
+
+  function createProduct(id: number, category: string): Product {
+    return {
+      id,
+      title: 'Example',
+      description: 'Example description',
+      category,
+      price: 10,
+      discountPercentage: 5,
+      rating: 4,
+      stock: 10,
+      tags: [],
+      thumbnail: 'https://example.test/thumbnail.png',
+      images: ['https://example.test/image.png'],
+    };
+  }
 });

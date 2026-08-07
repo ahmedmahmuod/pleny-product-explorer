@@ -1,10 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Product } from '../../models/product.models';
-import { ProductCard } from './product-card';
+import { ProductCard, ProductCardItem } from './product-card';
 
 describe('ProductCard', () => {
-  const product: Product = {
+  const product: ProductCardItem = {
     id: 12,
     title: 'iPhone 12',
     description: 'An Apple mobile which is nothing like apple.',
@@ -13,19 +12,9 @@ describe('ProductCard', () => {
     discountPercentage: 12.96,
     rating: 4.69,
     stock: 94,
-    tags: ['smartphones', 'apple'],
     brand: 'Apple',
     thumbnail: 'https://example.com/iphone-12.png',
-    images: ['https://example.com/iphone-12.png'],
-    reviews: [
-      {
-        rating: 5,
-        comment: 'Excellent phone.',
-        date: '2026-08-01T00:00:00.000Z',
-        reviewerName: 'Alex Morgan',
-        reviewerEmail: 'alex@example.com',
-      },
-    ],
+    reviews: [{}],
   };
 
   let fixture: ComponentFixture<ProductCard>;

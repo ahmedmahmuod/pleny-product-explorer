@@ -8,8 +8,21 @@ import {
   output,
 } from '@angular/core';
 
-import { Button } from '../../../../shared/ui/button/button';
-import { Product } from '../../models/product.models';
+import { Button } from '../button/button';
+
+export interface ProductCardItem {
+  readonly id: number;
+  readonly title: string;
+  readonly description: string;
+  readonly category: string;
+  readonly price: number;
+  readonly discountPercentage: number;
+  readonly rating: number;
+  readonly stock: number;
+  readonly brand?: string;
+  readonly thumbnail: string;
+  readonly reviews?: readonly unknown[];
+}
 
 @Component({
   selector: 'app-product-card',
@@ -19,7 +32,7 @@ import { Product } from '../../models/product.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductCard {
-  readonly product = input.required<Product>();
+  readonly product = input.required<ProductCardItem>();
   readonly adding = input(false, { transform: booleanAttribute });
   readonly addDisabled = input(false, { transform: booleanAttribute });
   readonly addToCart = output<number>();

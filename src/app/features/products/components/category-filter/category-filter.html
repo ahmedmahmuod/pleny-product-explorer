@@ -1,0 +1,44 @@
+<fieldset
+  class="category-filter"
+  [disabled]="fieldsetDisabled()"
+  [attr.aria-busy]="loading() ? 'true' : null"
+  [attr.aria-describedby]="error() ? describedById : null"
+>
+  <legend class="category-filter__legend">{{ label() }}</legend>
+
+  <div class="category-filter__options">
+    @for (option of options(); track option.value) {
+      <label class="category-filter__option">
+        <input
+          type="radio"
+          name="product-category"
+          [value]="option.value"
+          [checked]="value() === option.value"
+          (change)="selectCategory(option.value)"
+        />
+        <span class="category-filter__control" aria-hidden="true"></span>
+        <span class="category-filter__label">{{ option.label }}</span>
+        @if (option.count !== undefined) {
+          <span class="category-filter__count" aria-label="{{ option.count }} products">
+            ({{ option.count }})
+          </span>
+        }
+      </label>
+    } @empty {
+      <p class="category-filter__empty">No categories available.</p>
+    }
+  </div>
+
+  @if (loading()) {
+    <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
+      Loading product categories
+    </span>
+  }
+
+  @if (error()) {
+    <p class="category-filter__message" [id]="describedById" role="alert">
+      {{ error() }}
+      <button type="button" (click)="retry.emit()">Retry</button>
+    </p>
+  }
+</fieldset>

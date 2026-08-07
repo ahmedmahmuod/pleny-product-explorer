@@ -8,10 +8,14 @@ import {
   linkedSignal,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { Button } from '../../../../shared/ui/button/button';
-import { Select, SelectOption } from '../../../../shared/ui/select/select';
+import { ProductCard } from '../../../../shared/ui/product-card/product-card';
+import { Pagination } from '../../../../shared/ui/pagination/pagination';
+import {
+  CategoryFilter,
+  CategoryFilterOption,
+} from '../../components/category-filter/category-filter';
 import { ProductsStore } from '../../data-access/products.store';
 import { ProductQuery, ProductQueryInput } from '../../models/product-query.models';
 import {
@@ -23,8 +27,9 @@ import {
 
 @Component({
   selector: 'app-products-page',
-  imports: [Button, Select],
+  imports: [CategoryFilter, ProductCard, Pagination, RouterLink],
   templateUrl: './products.html',
+  styleUrl: './products.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductsPage {
@@ -40,16 +45,52 @@ export class ProductsPage {
     search: this.search(),
     category: this.category(),
   }));
-  private readonly routeQuery = computed(() => normalizeProductQuery(this.routeQueryInput()), {
+  protected readonly routeQuery = computed(() => normalizeProductQuery(this.routeQueryInput()), {
     equal: productQueriesEqual,
   });
   protected readonly categoryDraft = linkedSignal(
     () => normalizeProductQuery({ category: this.category() }).category,
   );
   protected readonly queryNavigationError = signal<string | null>(null);
-  protected readonly categoryOptions = computed<readonly SelectOption[]>(() =>
-    this.productsStore.categories().map(({ slug, name }) => ({ value: slug, label: name })),
-  );
+  protected readonly categoryOptions = computed<readonly CategoryFilterOption[]>(() => [
+    { value: '', label: 'All' },
+    ...this.productsStore
+      .categories()
+      .map(({ slug, name, count }) => ({ value: slug, label: name, count })),
+  ]);
+  protected readonly products = this.productsStore.products;
+  protected readonly total = this.productsStore.total;
+  protected readonly totalPages = this.productsStore.totalPages;
+  protected readonly isLoading = this.productsStore.isLoading;
+  protected readonly status = this.productsStore.status;
+  protected readonly productsError = this.productsStore.error;
+  protected readonly heading = computed(() => {
+    const query = this.routeQuery();
+
+    if (query.search) {
+      return query.search;
+    }
+
+    if (query.category) {
+      return this.categoryLabel(query.category);
+    }
+
+    return 'Products';
+  });
+  protected readonly breadcrumbCategory = computed(() => {
+    const category = this.routeQuery().category;
+
+    return category ? this.categoryLabel(category) : null;
+  });
+  protected readonly resultSummary = computed(() => {
+    const total = this.total();
+
+    if (this.status() === 'loading') {
+      return 'Loading products';
+    }
+
+    return `${total} ${total === 1 ? 'product' : 'products'}`;
+  });
   protected readonly areCategoriesLoading = this.productsStore.areCategoriesLoading;
   protected readonly categoriesError = this.productsStore.categoriesError;
 
@@ -117,11 +158,39 @@ export class ProductsPage {
     this.productsStore.loadCategories();
   }
 
+  protected retryProducts(): void {
+    this.productsStore.retryProducts();
+  }
+
+  protected changePage(page: number): void {
+    this.queryNavigationError.set(null);
+
+    void this.router
+      .navigate([], {
+        relativeTo: this.route,
+        queryParams: toProductQueryParams({
+          ...this.routeQuery(),
+          page,
+        }),
+      })
+      .catch(() => {
+        this.queryNavigationError.set('Unable to update product page. Please try again.');
+      });
+  }
+
   private isKnownCategory(category: string): boolean {
     return (
       !category ||
       this.productsStore.categoriesStatus() !== 'loaded' ||
       this.productsStore.categories().some(({ slug }) => slug === category)
     );
+  }
+
+  private categoryLabel(category: string): string {
+    const knownCategory = this.productsStore
+      .categories()
+      .find(({ slug }) => slug === category)?.name;
+
+    return knownCategory ?? category.replaceAll('-', ' ');
   }
 }

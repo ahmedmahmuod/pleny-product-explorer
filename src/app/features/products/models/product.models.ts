@@ -26,6 +26,11 @@ export interface ProductCategory {
   readonly slug: string;
   readonly name: string;
   readonly url: string;
+  /**
+   * The API does not include this field; the data service adds it from the
+   * complete product collection when the optional count request succeeds.
+   */
+  readonly count?: number;
 }
 
 export interface ProductsResponse {

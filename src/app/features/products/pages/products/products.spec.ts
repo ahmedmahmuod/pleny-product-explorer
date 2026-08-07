@@ -41,11 +41,13 @@ class ProductsApiStub {
       slug: 'smartphones',
       name: 'Smartphones',
       url: 'https://dummyjson.com/products/category/smartphones',
+      count: 2,
     },
     {
       slug: 'laptops',
       name: 'Laptops',
       url: 'https://dummyjson.com/products/category/laptops',
+      count: 1,
     },
   ];
   readonly categoryProducts = Array.from({ length: 20 }, (_, index) =>
@@ -168,8 +170,8 @@ describe('ProductsPage URL state', () => {
 
     await navigate('/products?page=1');
 
-    expect(categorySelect().disabled).toBe(true);
-    expect(categorySelect().getAttribute('aria-busy')).toBe('true');
+    expect(categoryFilter().disabled).toBe(true);
+    expect(categoryFilter().getAttribute('aria-busy')).toBe('true');
     expect(routeElement().querySelector('[role="status"]')?.textContent).toContain(
       'Loading product categories',
     );
@@ -178,24 +180,24 @@ describe('ProductsPage URL state', () => {
     categoriesResponse.complete();
     harness.detectChanges();
 
-    expect(categorySelect().disabled).toBe(false);
-    expect(categorySelect().getAttribute('aria-busy')).toBeNull();
-    expect(selectOptions()).toEqual([
-      { value: '', label: 'All categories' },
-      { value: 'smartphones', label: 'Smartphones' },
-      { value: 'laptops', label: 'Laptops' },
+    expect(categoryFilter().disabled).toBe(false);
+    expect(categoryFilter().getAttribute('aria-busy')).toBeNull();
+    expect(categoryOptions()).toEqual([
+      { value: '', label: 'All' },
+      { value: 'smartphones', label: 'Smartphones', count: 2 },
+      { value: 'laptops', label: 'Laptops', count: 1 },
     ]);
   });
 
   it('updates category immediately, preserves search, resets page, and combines the filters', async () => {
     await navigate('/products?page=3&search=phone');
 
-    changeSelect(categorySelect(), 'laptops');
+    changeRadio('laptops');
     await harness.fixture.whenStable();
     harness.detectChanges();
 
     expect(TestBed.inject(Router).url).toBe('/products?page=1&search=phone&category=laptops');
-    expect(categorySelect().value).toBe('laptops');
+    expect(checkedCategory()).toBe('laptops');
     expect(productsApi.getProductsByCategory).toHaveBeenLastCalledWith('laptops', {
       limit: 0,
       skip: 0,
@@ -206,12 +208,12 @@ describe('ProductsPage URL state', () => {
   it('selecting all categories removes the category while preserving search', async () => {
     await navigate('/products?page=2&search=phone&category=smartphones');
 
-    changeSelect(categorySelect(), '');
+    changeRadio('');
     await harness.fixture.whenStable();
     harness.detectChanges();
 
     expect(TestBed.inject(Router).url).toBe('/products?page=1&search=phone');
-    expect(categorySelect().value).toBe('');
+    expect(checkedCategory()).toBe('');
     expect(productsApi.searchProducts).toHaveBeenLastCalledWith('phone', {
       limit: PRODUCTS_PAGE_SIZE,
       skip: 0,
@@ -222,7 +224,7 @@ describe('ProductsPage URL state', () => {
     await navigate('/products?page=2&category=unknown-category');
 
     expect(TestBed.inject(Router).url).toBe('/products?page=2');
-    expect(categorySelect().value).toBe('');
+    expect(checkedCategory()).toBe('');
     expect(TestBed.inject(ProductsStore).query()).toEqual({
       page: 2,
       search: '',
@@ -237,7 +239,6 @@ describe('ProductsPage URL state', () => {
 
     await navigate('/products?page=1');
 
-    expect(categorySelect().getAttribute('aria-invalid')).toBe('true');
     expect(routeElement().querySelector('[role="alert"]')?.textContent).toContain(
       'Unable to load categories',
     );
@@ -248,8 +249,38 @@ describe('ProductsPage URL state', () => {
     harness.detectChanges();
 
     expect(productsApi.getCategories).toHaveBeenCalledTimes(2);
-    expect(categorySelect().getAttribute('aria-invalid')).toBeNull();
-    expect(selectOptions()).toHaveLength(3);
+    expect(routeElement().querySelector('[role="alert"]')).toBeNull();
+    expect(categoryOptions()).toHaveLength(3);
+  });
+
+  it('renders product cards and changes the page through reusable pagination', async () => {
+    await navigate('/products?page=2&category=smartphones');
+
+    expect(routeElement().querySelectorAll('app-product-card')).toHaveLength(20);
+
+    pageButton('1').click();
+    await harness.fixture.whenStable();
+    harness.detectChanges();
+
+    expect(TestBed.inject(Router).url).toBe('/products?page=1&category=smartphones');
+  });
+
+  it('keeps pagination visible for a single loaded result page', async () => {
+    productsApi.getProducts.mockReturnValue(
+      of(
+        productsResponse([createProduct(1, 'Single page product')], 1, {
+          limit: PRODUCTS_PAGE_SIZE,
+          skip: 0,
+        }),
+      ),
+    );
+
+    await navigate('/products?page=1');
+
+    expect(routeElement().querySelector('app-pagination nav')).not.toBeNull();
+    expect(pageButton('1')).not.toBeNull();
+    expect(controlButton('Previous page').disabled).toBe(true);
+    expect(controlButton('Next page').disabled).toBe(true);
   });
 
   it('renders the header search and navigates once for rapid normalized input', async () => {
@@ -263,7 +294,9 @@ describe('ProductsPage URL state', () => {
     enterValue(input, '  phone  ');
     await waitForSearchDebounce();
 
-    expect(routeElement().querySelector('h1')?.textContent).toContain('Products');
+    expect(routeElement().querySelector('[aria-label="Breadcrumb"]')?.textContent).toContain(
+      'Products',
+    );
     expect(
       routeElement().querySelector('label[for="header-product-search"]')?.textContent,
     ).toContain('Search products');
@@ -387,20 +420,37 @@ describe('ProductsPage URL state', () => {
     return routeElement().querySelector('input[type="search"]') as HTMLInputElement;
   }
 
-  function categorySelect(): HTMLSelectElement {
-    return routeElement().querySelector('select') as HTMLSelectElement;
+  function categoryFilter(): HTMLFieldSetElement {
+    return routeElement().querySelector('app-category-filter fieldset') as HTMLFieldSetElement;
   }
 
-  function selectOptions(): readonly { value: string; label: string }[] {
-    return Array.from(categorySelect().options).map(({ value, textContent }) => ({
-      value,
-      label: textContent?.trim() ?? '',
-    }));
+  function categoryOptions(): readonly { value: string; label: string; count?: number }[] {
+    return Array.from(
+      routeElement().querySelectorAll('app-category-filter input[type="radio"]'),
+    ).map((input) => {
+      const countText = input.parentElement?.querySelector('.category-filter__count')?.textContent;
+      const count = Number.parseInt(countText?.replace(/\D/g, '') ?? '', 10);
+
+      return {
+        value: (input as HTMLInputElement).value,
+        label:
+          input.parentElement?.querySelector('.category-filter__label')?.textContent?.trim() ?? '',
+        ...(Number.isNaN(count) ? {} : { count }),
+      };
+    });
+  }
+
+  function checkedCategory(): string {
+    return (
+      routeElement().querySelector(
+        'app-category-filter input[type="radio"]:checked',
+      ) as HTMLInputElement
+    ).value;
   }
 
   function retryCategoriesButton(): HTMLButtonElement {
-    return Array.from(routeElement().querySelectorAll('button')).find((button) =>
-      button.textContent?.includes('Retry categories'),
+    return routeElement().querySelector(
+      'app-category-filter .category-filter__message button',
     ) as HTMLButtonElement;
   }
 
@@ -408,16 +458,15 @@ describe('ProductsPage URL state', () => {
     return harness.fixture.debugElement.query(By.directive(ProductsPage))
       .componentInstance as ProductsPage;
   }
+
+  function controlButton(label: string): HTMLButtonElement {
+    return routeElement().querySelector(`button[aria-label="${label}"]`) as HTMLButtonElement;
+  }
 });
 
 function enterValue(input: HTMLInputElement, value: string): void {
   input.value = value;
   input.dispatchEvent(new Event('input', { bubbles: true }));
-}
-
-function changeSelect(select: HTMLSelectElement, value: string): void {
-  select.value = value;
-  select.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 function createProduct(id: number, title: string): Product {
@@ -435,6 +484,20 @@ function createProduct(id: number, title: string): Product {
     thumbnail: `https://example.test/products/${id}/thumbnail.png`,
     images: [`https://example.test/products/${id}/image.png`],
   };
+}
+
+function changeRadio(value: string): void {
+  const radio = document.querySelector(
+    `app-category-filter input[type="radio"][value="${value}"]`,
+  ) as HTMLInputElement;
+  radio.checked = true;
+  radio.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+function pageButton(label: string): HTMLButtonElement {
+  return Array.from(document.querySelectorAll('.pagination__page')).find(
+    (button) => button.textContent?.trim() === label,
+  ) as HTMLButtonElement;
 }
 
 function productsResponse(
