@@ -1,0 +1,44 @@
+:host {
+  display: block;
+}
+
+footer {
+  background: var(--color-footer);
+  color: var(--color-footer-text);
+}
+
+.footer-content {
+  display: flex;
+  width: min(100%, var(--layout-content-max));
+  min-height: var(--layout-footer-height);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-15);
+  margin-inline: auto;
+  padding: var(--space-14) var(--space-12);
+}
+
+.brand {
+  display: inline-flex;
+  width: 142px;
+  height: var(--logo-size);
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-footer-text);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+}
+
+.brand-logo {
+  width: var(--logo-size);
+  height: var(--logo-size);
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+small {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
