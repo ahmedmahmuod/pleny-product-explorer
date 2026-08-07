@@ -4,6 +4,7 @@ import {
   ProductQueryInput,
 } from '../models/product-query.models';
 import { ProductPagination } from '../models/product.models';
+import { normalizeSearchTerm } from '../../../shared/utilities/normalize-search-term';
 
 export const DEFAULT_PRODUCT_QUERY: ProductQuery = {
   page: 1,
@@ -14,7 +15,7 @@ export const DEFAULT_PRODUCT_QUERY: ProductQuery = {
 export function normalizeProductQuery(input: ProductQueryInput): ProductQuery {
   return {
     page: normalizePage(input.page),
-    search: normalizeSearch(input.search),
+    search: normalizeSearchTerm(input.search),
     category: normalizeCategory(input.category),
   };
 }
@@ -68,10 +69,6 @@ function normalizePage(value: ProductQueryInput['page']): number {
         : Number.NaN;
 
   return Number.isSafeInteger(page) && page >= 1 ? page : 1;
-}
-
-function normalizeSearch(value: ProductQueryInput['search']): string {
-  return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : '';
 }
 
 function normalizeCategory(value: ProductQueryInput['category']): string {

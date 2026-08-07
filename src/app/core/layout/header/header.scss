@@ -1,4 +1,6 @@
 :host {
+  position: relative;
+  z-index: 10;
   display: block;
 }
 
@@ -7,23 +9,29 @@ header {
   height: var(--layout-header-height);
   align-items: center;
   border-block-end: var(--border-width-default) solid var(--color-border-divider);
+  background: var(--color-surface);
 }
 
 nav {
-  display: grid;
+  display: flex;
   width: min(100%, var(--layout-content-max));
   height: var(--layout-header-content-height);
-  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--space-13);
+  justify-content: space-between;
+  gap: var(--space-12);
   margin-inline: auto;
   padding-inline: var(--space-12);
+}
+
+.navigation-start {
+  display: flex;
+  align-items: center;
+  gap: var(--space-13);
 }
 
 .brand {
   display: inline-flex;
   width: 142px;
-  height: var(--logo-size);
   align-items: center;
   gap: var(--space-3);
   color: var(--color-text-black);
@@ -48,10 +56,91 @@ nav {
   text-decoration: none;
 }
 
-.home-link {
-  justify-self: start;
+.nav-link--active {
+  color: var(--color-text);
 }
 
-.login-link {
-  justify-self: end;
+.authenticated-actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.search-region {
+  position: relative;
+  width: 320px;
+  height: 32px;
+}
+
+.search-region input {
+  width: 100%;
+  height: 100%;
+  padding: var(--space-2) var(--space-13) var(--space-2) var(--space-7);
+  border: var(--border-width-default) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-border-strong);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+}
+
+.search-region input::placeholder {
+  color: var(--color-text-placeholder);
+  opacity: 1;
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3);
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.cart {
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--color-text-secondary);
+}
+
+.cart img {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 47.999rem) {
+  nav {
+    gap: var(--space-3);
+    padding-inline: var(--space-4);
+  }
+
+  .navigation-start {
+    gap: 0;
+  }
+
+  .brand {
+    width: var(--logo-size);
+  }
+
+  .brand span,
+  .home-link {
+    display: none;
+  }
+
+  .authenticated-actions {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    gap: var(--space-3);
+  }
+
+  .search-region {
+    width: min(320px, calc(100vw - 136px));
+  }
 }

@@ -5,7 +5,7 @@ import { provideRouter, Router, withComponentInputBinding } from '@angular/route
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { routes } from '../../../../app.routes';
-import { AuthCredentials } from '../../../../core/auth/models/auth.models';
+import { AuthCredentials, AuthUser } from '../../../../core/auth/models/auth.models';
 import { AuthStore } from '../../../../core/auth/data-access/auth.store';
 import { AppLayout } from '../../../../core/layout/app-layout/app-layout';
 import { LoginPage } from './login';
@@ -14,7 +14,9 @@ class AuthStoreStub {
   readonly isAuthenticated = signal(false);
   readonly isLoading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly user = signal<AuthUser | null>(null);
   readonly login = vi.fn((_credentials: AuthCredentials): void => undefined);
+  readonly logout = vi.fn();
 }
 
 describe('LoginPage', () => {
