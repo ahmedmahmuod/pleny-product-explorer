@@ -61,10 +61,45 @@
 }
 
 .products-page__summary {
-  margin: 0 0 var(--space-4);
+  margin: 0;
   color: var(--color-text);
   font-size: var(--font-size-body-sm);
   line-height: normal;
+}
+
+.products-page__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  margin-block-end: var(--space-4);
+}
+
+.products-page__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--font-size-body-sm);
+  line-height: normal;
+}
+
+.products-page__sort span {
+  font-weight: var(--font-weight-semibold);
+}
+
+.products-page__sort select {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.products-page__sort select:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .products-page__message,
@@ -120,13 +155,32 @@
   margin-block-start: var(--space-15);
 }
 
-@media (max-width: 72rem) {
+@media (min-width: 60.001rem) and (max-width: 72rem) {
   .products-page__content {
-    grid-template-columns: 1fr;
+    grid-template-columns: var(--product-category-panel-width) minmax(0, 1fr);
   }
 
   .products-page__grid {
-    grid-template-columns: repeat(auto-fit, minmax(var(--product-card-width), 1fr));
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--product-card-width)), var(--product-card-width))
+    );
+    justify-content: start;
+  }
+}
+
+@media (max-width: 60rem) {
+  .products-page__content {
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+  }
+
+  .products-page__grid {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--product-card-width)), var(--product-card-width))
+    );
+    justify-content: center;
   }
 }
 
@@ -141,9 +195,29 @@
 
   .products-page__breadcrumbs {
     font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
   }
 
-  .products-page__grid {
-    justify-items: center;
+  .products-page__toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .products-page__sort {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .products-page__sort select {
+    max-width: 65%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .products-page__pagination {
+    --pagination-item-size: 28px;
+    --space-3: 4px;
+    margin-block-start: var(--space-12);
   }
 }

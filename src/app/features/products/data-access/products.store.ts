@@ -8,6 +8,7 @@ import {
   PRODUCTS_PAGE_SIZE,
   ProductQuery,
   ProductQueryInput,
+  ProductSort,
 } from '../models/product-query.models';
 import { Product, ProductCategory, ProductsResponse } from '../models/product.models';
 import {
@@ -135,35 +136,49 @@ function getProductsRequest(
   query: ProductQuery,
 ): Observable<ProductsResponse> {
   const pagination = getProductPagination(query.page);
+  const sort: ProductSort = { sortBy: query.sortBy, order: query.order };
 
   if (query.category && query.search) {
     return productsApi
-      .getProductsByCategory(query.category, { limit: 0, skip: 0 })
+      .getProductsByCategory(query.category, { limit: 0, skip: 0 }, sort)
       .pipe(map((response) => filterAndPaginate(response.products, query)));
   }
 
   if (query.category) {
-    return productsApi.getProductsByCategory(query.category, pagination);
+    return productsApi.getProductsByCategory(query.category, pagination, sort);
   }
 
   if (query.search) {
-    return productsApi.searchProducts(query.search, pagination);
+    return productsApi.searchProducts(query.search, pagination, sort);
   }
 
-  return productsApi.getProducts(pagination);
+  return productsApi.getProducts(pagination, sort);
 }
 
 function filterAndPaginate(products: readonly Product[], query: ProductQuery): ProductsResponse {
   const search = query.search.toLowerCase();
   const matches = products.filter((product) => productMatchesSearch(product, search));
+  const sortedMatches = [...matches].sort((left, right) => compareProducts(left, right, query));
   const { limit, skip } = getProductPagination(query.page);
 
   return {
-    products: matches.slice(skip, skip + limit),
-    total: matches.length,
+    products: sortedMatches.slice(skip, skip + limit),
+    total: sortedMatches.length,
     skip,
     limit,
   };
+}
+
+function compareProducts(left: Product, right: Product, query: ProductQuery): number {
+  const direction = query.order === 'asc' ? 1 : -1;
+
+  if (query.sortBy === 'title') {
+    return left.title.localeCompare(right.title) * direction;
+  }
+
+  const leftValue = left[query.sortBy];
+  const rightValue = right[query.sortBy];
+  return (leftValue - rightValue) * direction;
 }
 
 function productMatchesSearch(product: Product, search: string): boolean {

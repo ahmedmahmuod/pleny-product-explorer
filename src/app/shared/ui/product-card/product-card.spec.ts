@@ -101,6 +101,17 @@ describe('ProductCard', () => {
     expect(emittedIds).toEqual([]);
   });
 
+  it('disables an existing cart item and explains why it cannot be added again', () => {
+    fixture.componentRef.setInput('inCart', true);
+    fixture.detectChanges();
+
+    expect(nativeButton().disabled).toBe(true);
+    expect(nativeButton().textContent).toContain('Added to cart');
+    expect(nativeButton().title).toBe('iPhone 12 is already in your cart');
+    expect(nativeButton().getAttribute('aria-describedby')).toBe('product-12-cart-help');
+    expect(fixture.nativeElement.textContent).toContain('This product is already in your cart.');
+  });
+
   it('uses an unavailable action and blocks intent for an out-of-stock product', () => {
     const emittedIds: number[] = [];
     fixture.componentInstance.addToCart.subscribe((productId) => emittedIds.push(productId));

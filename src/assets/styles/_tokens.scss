@@ -52,6 +52,7 @@
   --border-width-divider: 0.5px;
   --border-width-thin: 0.7px;
   --border-width-default: 1px;
+  --border-width-badge: 2px;
 
   --shadow-xs: 0 1px 2px rgb(16 24 40 / 6%);
   --shadow-sm: 0 1px 3px rgb(16 24 40 / 10%);
@@ -116,6 +117,9 @@
   --color-action-hover: #35b8bb;
   --color-action-active: #2ca5a8;
   --color-on-action: #344054;
+  --color-badge-surface: #41cccc;
+  --color-badge-text: #344054;
+  --color-badge-border: #ffffff;
   --color-rating: #f4b000;
   --color-footer: #1d2939;
   --color-footer-text: #ffffff;
@@ -159,6 +163,9 @@
   --color-action-hover: #67d7d9;
   --color-action-active: #35b8bb;
   --color-on-action: #102a30;
+  --color-badge-surface: #41cccc;
+  --color-badge-text: #344054;
+  --color-badge-border: #ffffff;
   --color-rating: #fdbf24;
   --color-footer: #0b1520;
   --color-footer-text: #e4e7ec;

@@ -58,11 +58,18 @@
       type="button"
       size="large"
       [disabled]="actionDisabled()"
+      [title]="actionTooltip()"
+      [ariaDescribedBy]="inCart() ? actionDescriptionId() : null"
       [loading]="adding()"
       [loadingLabel]="'Adding ' + product().title + ' to cart'"
       (click)="requestAdd()"
     >
-      {{ product().stock > 0 ? 'Add to cart' : 'Out of stock' }}
+      {{ product().stock <= 0 ? 'Out of stock' : inCart() ? 'Added to cart' : 'Add to cart' }}
     </app-button>
+    @if (inCart()) {
+      <span class="visually-hidden" [id]="actionDescriptionId()">
+        This product is already in your cart.
+      </span>
+    }
   </div>
 </article>

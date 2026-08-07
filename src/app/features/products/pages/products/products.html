@@ -34,11 +34,28 @@
     </aside>
 
     <div class="products-page__results">
-      <p class="products-page__summary" aria-live="polite">{{ resultSummary() }}</p>
+      <div class="products-page__toolbar">
+        <p class="products-page__summary" aria-live="polite">{{ resultSummary() }}</p>
+
+        <label class="products-page__sort">
+          <span>Sort By:</span>
+          <select #sortSelect aria-label="Sort products" [value]="sortKey()" (change)="changeSort(sortSelect.value)">
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+      </div>
 
       @if (queryNavigationError()) {
         <p class="products-page__message" role="alert" aria-live="assertive">
           {{ queryNavigationError() }}
+        </p>
+      }
+
+      @if (cartStore.error()) {
+        <p class="products-page__message" role="alert" aria-live="assertive">
+          {{ cartStore.error() }}
         </p>
       }
 
@@ -56,7 +73,13 @@
       } @else {
         <div class="products-page__grid">
           @for (product of products(); track product.id) {
-            <app-product-card [product]="product" />
+            <app-product-card
+              [product]="product"
+              [adding]="cartStore.isProductAdding(product.id)"
+              [addDisabled]="cartStore.isLoading()"
+              [inCart]="cartStore.isProductInCart(product.id)"
+              (addToCart)="addToCart($event)"
+            />
           } @empty {
             <div class="products-page__feedback">
               <p>No products match the current filters.</p>

@@ -34,6 +34,7 @@ export interface ProductCardItem {
 export class ProductCard {
   readonly product = input.required<ProductCardItem>();
   readonly adding = input(false, { transform: booleanAttribute });
+  readonly inCart = input(false, { transform: booleanAttribute });
   readonly addDisabled = input(false, { transform: booleanAttribute });
   readonly addToCart = output<number>();
 
@@ -45,8 +46,12 @@ export class ProductCard {
   });
   protected readonly reviewCount = computed(() => this.product().reviews?.length ?? null);
   protected readonly actionDisabled = computed(
-    () => this.addDisabled() || this.product().stock <= 0,
+    () => this.addDisabled() || this.inCart() || this.product().stock <= 0,
   );
+  protected readonly actionTooltip = computed(() =>
+    this.inCart() ? `${this.product().title} is already in your cart` : null,
+  );
+  protected readonly actionDescriptionId = computed(() => `product-${this.product().id}-cart-help`);
   protected readonly ratingLabel = computed(() => {
     const { rating } = this.product();
     const count = this.reviewCount();

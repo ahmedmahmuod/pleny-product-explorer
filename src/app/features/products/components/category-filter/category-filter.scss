@@ -122,3 +122,26 @@
   font-weight: var(--font-weight-bold);
   text-decoration: underline;
 }
+
+@media (max-width: 960px) {
+  .category-filter {
+    width: 100%;
+    min-height: auto;
+    padding: var(--space-6);
+  }
+
+  .category-filter__options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--space-8);
+    row-gap: var(--space-3);
+    margin-block-start: var(--space-6);
+  }
+
+  .category-filter__option {
+    font-size: var(--font-size-body-sm);
+  }
+
+  .category-filter__count {
+    margin-inline-start: 0;
+  }
+}

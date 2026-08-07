@@ -21,20 +21,23 @@ import {
 } from 'rxjs';
 
 import { normalizeSearchTerm } from '../../../shared/utilities/normalize-search-term';
+import { CartBadge } from '../../../shared/ui/cart-badge/cart-badge';
 import { AuthStore } from '../../auth/data-access/auth.store';
+import { CartStore } from '../../cart/data-access/cart.store';
 import { AccountMenu } from './account-menu/account-menu';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink, RouterLinkActive, AccountMenu],
+  imports: [RouterLink, RouterLinkActive, AccountMenu, CartBadge],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppHeader {
   protected readonly authStore = inject(AuthStore);
+  protected readonly cartStore = inject(CartStore);
 
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);

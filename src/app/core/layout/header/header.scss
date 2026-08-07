@@ -101,22 +101,9 @@ nav {
   transform: translateY(-50%);
 }
 
-.cart {
-  display: inline-grid;
-  width: 24px;
-  height: 24px;
-  flex: 0 0 auto;
-  place-items: center;
-  color: var(--color-text-secondary);
-}
-
-.cart img {
-  width: 24px;
-  height: 24px;
-}
-
 @media (max-width: 47.999rem) {
   nav {
+    position: relative;
     gap: var(--space-3);
     padding-inline: var(--space-4);
   }
@@ -141,6 +128,9 @@ nav {
   }
 
   .search-region {
-    width: min(320px, calc(100vw - 136px));
+    position: absolute;
+    left: 50%;
+    width: clamp(8.5rem, 42vw, 20rem);
+    transform: translateX(-50%);
   }
 }

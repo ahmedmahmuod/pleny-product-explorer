@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, of, switchMap } from 'rxjs';
 
 import { API_BASE_URL } from '../../../core/config/api.config';
+import { ProductSort } from '../models/product-query.models';
 import { ProductCategory, ProductPagination, ProductsResponse } from '../models/product.models';
 
 @Injectable({ providedIn: 'root' })
@@ -10,25 +11,30 @@ export class ProductsApiService {
   private readonly http = inject(HttpClient);
   private readonly productsUrl = `${inject(API_BASE_URL).replace(/\/+$/, '')}/products`;
 
-  getProducts(pagination: ProductPagination): Observable<ProductsResponse> {
+  getProducts(pagination: ProductPagination, sort?: ProductSort): Observable<ProductsResponse> {
     return this.http.get<ProductsResponse>(this.productsUrl, {
-      params: this.getPaginationParams(pagination),
+      params: this.getPaginationParams(pagination, sort),
     });
   }
 
-  searchProducts(search: string, pagination: ProductPagination): Observable<ProductsResponse> {
+  searchProducts(
+    search: string,
+    pagination: ProductPagination,
+    sort?: ProductSort,
+  ): Observable<ProductsResponse> {
     return this.http.get<ProductsResponse>(`${this.productsUrl}/search`, {
-      params: this.getPaginationParams(pagination).set('q', search),
+      params: this.getPaginationParams(pagination, sort).set('q', search),
     });
   }
 
   getProductsByCategory(
     category: string,
     pagination: ProductPagination,
+    sort?: ProductSort,
   ): Observable<ProductsResponse> {
     return this.http.get<ProductsResponse>(
       `${this.productsUrl}/category/${encodeURIComponent(category)}`,
-      { params: this.getPaginationParams(pagination) },
+      { params: this.getPaginationParams(pagination, sort) },
     );
   }
 
@@ -64,7 +70,13 @@ export class ProductsApiService {
     );
   }
 
-  private getPaginationParams({ limit, skip }: ProductPagination): HttpParams {
-    return new HttpParams().set('limit', limit).set('skip', skip);
+  private getPaginationParams({ limit, skip }: ProductPagination, sort?: ProductSort): HttpParams {
+    let params = new HttpParams().set('limit', limit).set('skip', skip);
+
+    if (sort) {
+      params = params.set('sortBy', sort.sortBy).set('order', sort.order);
+    }
+
+    return params;
   }
 }

@@ -66,6 +66,18 @@ describe('ProductsApiService', () => {
     request.flush({ ...response, skip: 0 });
   });
 
+  it('sends sortBy and order for sorted product requests', () => {
+    service.getProducts({ limit: 9, skip: 0 }, { sortBy: 'title', order: 'asc' }).subscribe();
+
+    const request = httpTesting.expectOne(
+      (candidate) => candidate.url === 'https://api.example.test/products',
+    );
+
+    expect(request.request.params.get('sortBy')).toBe('title');
+    expect(request.request.params.get('order')).toBe('asc');
+    request.flush({ ...response, skip: 0 });
+  });
+
   it('encodes a category slug and sends pagination', () => {
     service.getProductsByCategory('smart phones', { limit: 9, skip: 9 }).subscribe();
 

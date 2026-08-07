@@ -6,6 +6,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { Observable, of, Subject, throwError } from 'rxjs';
 
 import { routes } from '../../../../app.routes';
+import { CartStore } from '../../../../core/cart/data-access/cart.store';
 import { AuthStore } from '../../../../core/auth/data-access/auth.store';
 import { AuthUser } from '../../../../core/auth/models/auth.models';
 import { AppLayout } from '../../../../core/layout/app-layout/app-layout';
@@ -33,6 +34,21 @@ class AuthStoreStub {
   readonly user = signal<AuthUser | null>(null);
   readonly login = vi.fn();
   readonly logout = vi.fn();
+}
+
+class CartStoreStub {
+  readonly totalQuantity = signal(0);
+  readonly isLoading = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly addProduct = vi.fn();
+
+  isProductAdding(_productId: number): boolean {
+    return false;
+  }
+
+  isProductInCart(_productId: number): boolean {
+    return false;
+  }
 }
 
 class ProductsApiStub {
@@ -69,11 +85,13 @@ class ProductsApiStub {
 
 describe('ProductsPage URL state', () => {
   let authStore: AuthStoreStub;
+  let cartStore: CartStoreStub;
   let productsApi: ProductsApiStub;
   let harness: RouterTestingHarness;
 
   beforeEach(async () => {
     authStore = new AuthStoreStub();
+    cartStore = new CartStoreStub();
     productsApi = new ProductsApiStub();
 
     TestBed.configureTestingModule({
@@ -83,6 +101,7 @@ describe('ProductsPage URL state', () => {
           withComponentInputBinding(),
         ),
         { provide: AuthStore, useValue: authStore },
+        { provide: CartStore, useValue: cartStore },
         { provide: ProductsApiService, useValue: productsApi },
       ],
     });
@@ -109,12 +128,22 @@ describe('ProductsPage URL state', () => {
     expect(page.search()).toBe('phone');
     expect(page.category()).toBe('smartphones');
     expect(searchInput().value).toBe('phone');
-    expect(store.query()).toEqual({ page: 2, search: 'phone', category: 'smartphones' });
-    expect(productsApi.getProductsByCategory).toHaveBeenCalledOnce();
-    expect(productsApi.getProductsByCategory).toHaveBeenCalledWith('smartphones', {
-      limit: 0,
-      skip: 0,
+    expect(store.query()).toEqual({
+      page: 2,
+      search: 'phone',
+      category: 'smartphones',
+      sortBy: 'rating',
+      order: 'desc',
     });
+    expect(productsApi.getProductsByCategory).toHaveBeenCalledOnce();
+    expect(productsApi.getProductsByCategory).toHaveBeenCalledWith(
+      'smartphones',
+      {
+        limit: 0,
+        skip: 0,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
     expect(TestBed.inject(Router).url).toBe('/products?page=2&search=phone&category=smartphones');
   });
 
@@ -125,12 +154,17 @@ describe('ProductsPage URL state', () => {
       page: 1,
       search: '',
       category: '',
+      sortBy: 'rating',
+      order: 'desc',
     });
     expect(productsApi.getProducts).toHaveBeenCalledOnce();
-    expect(productsApi.getProducts).toHaveBeenCalledWith({
-      limit: PRODUCTS_PAGE_SIZE,
-      skip: 0,
-    });
+    expect(productsApi.getProducts).toHaveBeenCalledWith(
+      {
+        limit: PRODUCTS_PAGE_SIZE,
+        skip: 0,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
     expect(TestBed.inject(Router).url).toBe('/products?page=1');
   });
 
@@ -138,14 +172,22 @@ describe('ProductsPage URL state', () => {
     await navigate('/products?page=99');
 
     expect(TestBed.inject(Router).url).toBe('/products?page=3');
-    expect(productsApi.getProducts).toHaveBeenNthCalledWith(1, {
-      limit: PRODUCTS_PAGE_SIZE,
-      skip: PRODUCTS_PAGE_SIZE * 98,
-    });
-    expect(productsApi.getProducts).toHaveBeenNthCalledWith(2, {
-      limit: PRODUCTS_PAGE_SIZE,
-      skip: PRODUCTS_PAGE_SIZE * 2,
-    });
+    expect(productsApi.getProducts).toHaveBeenNthCalledWith(
+      1,
+      {
+        limit: PRODUCTS_PAGE_SIZE,
+        skip: PRODUCTS_PAGE_SIZE * 98,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
+    expect(productsApi.getProducts).toHaveBeenNthCalledWith(
+      2,
+      {
+        limit: PRODUCTS_PAGE_SIZE,
+        skip: PRODUCTS_PAGE_SIZE * 2,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
     expect(TestBed.inject(ProductsStore).query().page).toBe(3);
   });
 
@@ -198,10 +240,14 @@ describe('ProductsPage URL state', () => {
 
     expect(TestBed.inject(Router).url).toBe('/products?page=1&search=phone&category=laptops');
     expect(checkedCategory()).toBe('laptops');
-    expect(productsApi.getProductsByCategory).toHaveBeenLastCalledWith('laptops', {
-      limit: 0,
-      skip: 0,
-    });
+    expect(productsApi.getProductsByCategory).toHaveBeenLastCalledWith(
+      'laptops',
+      {
+        limit: 0,
+        skip: 0,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
     expect(productsApi.getCategories).toHaveBeenCalledOnce();
   });
 
@@ -214,10 +260,14 @@ describe('ProductsPage URL state', () => {
 
     expect(TestBed.inject(Router).url).toBe('/products?page=1&search=phone');
     expect(checkedCategory()).toBe('');
-    expect(productsApi.searchProducts).toHaveBeenLastCalledWith('phone', {
-      limit: PRODUCTS_PAGE_SIZE,
-      skip: 0,
-    });
+    expect(productsApi.searchProducts).toHaveBeenLastCalledWith(
+      'phone',
+      {
+        limit: PRODUCTS_PAGE_SIZE,
+        skip: 0,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
   });
 
   it('removes an unknown category after the valid category list loads', async () => {
@@ -229,6 +279,8 @@ describe('ProductsPage URL state', () => {
       page: 2,
       search: '',
       category: '',
+      sortBy: 'rating',
+      order: 'desc',
     });
   });
 
@@ -263,6 +315,32 @@ describe('ProductsPage URL state', () => {
     harness.detectChanges();
 
     expect(TestBed.inject(Router).url).toBe('/products?page=1&category=smartphones');
+  });
+
+  it('routes a product card add intent to CartStore', async () => {
+    await navigate('/products?page=1&category=smartphones');
+
+    const addButton = routeElement().querySelector('app-product-card button') as HTMLButtonElement;
+    addButton.click();
+
+    expect(cartStore.addProduct).toHaveBeenCalledWith(1);
+  });
+
+  it('changes sorting through the URL and resets the page', async () => {
+    await navigate('/products?page=3&search=phone');
+
+    const select = sortSelect();
+    select.value = 'price:asc';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    await harness.fixture.whenStable();
+    harness.detectChanges();
+
+    expect(TestBed.inject(Router).url).toBe('/products?page=1&search=phone&sortBy=price&order=asc');
+    expect(productsApi.searchProducts).toHaveBeenLastCalledWith(
+      'phone',
+      { limit: PRODUCTS_PAGE_SIZE, skip: 0 },
+      { sortBy: 'price', order: 'asc' },
+    );
   });
 
   it('keeps pagination visible for a single loaded result page', async () => {
@@ -335,14 +413,24 @@ describe('ProductsPage URL state', () => {
     await waitForSearchDebounce();
 
     expect(firstRequestCancelled).toBe(true);
-    expect(productsApi.searchProducts).toHaveBeenNthCalledWith(1, 'phone', {
-      limit: PRODUCTS_PAGE_SIZE,
-      skip: 0,
-    });
-    expect(productsApi.searchProducts).toHaveBeenNthCalledWith(2, 'laptop', {
-      limit: PRODUCTS_PAGE_SIZE,
-      skip: 0,
-    });
+    expect(productsApi.searchProducts).toHaveBeenNthCalledWith(
+      1,
+      'phone',
+      {
+        limit: PRODUCTS_PAGE_SIZE,
+        skip: 0,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
+    expect(productsApi.searchProducts).toHaveBeenNthCalledWith(
+      2,
+      'laptop',
+      {
+        limit: PRODUCTS_PAGE_SIZE,
+        skip: 0,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
     expect(TestBed.inject(ProductsStore).status()).toBe('loaded');
   });
 
@@ -357,6 +445,8 @@ describe('ProductsPage URL state', () => {
       page: 1,
       search: '',
       category: 'smartphones',
+      sortBy: 'rating',
+      order: 'desc',
     });
   });
 
@@ -418,6 +508,10 @@ describe('ProductsPage URL state', () => {
 
   function searchInput(): HTMLInputElement {
     return routeElement().querySelector('input[type="search"]') as HTMLInputElement;
+  }
+
+  function sortSelect(): HTMLSelectElement {
+    return routeElement().querySelector('select[aria-label="Sort products"]') as HTMLSelectElement;
   }
 
   function categoryFilter(): HTMLFieldSetElement {

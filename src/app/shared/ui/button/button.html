@@ -5,6 +5,8 @@
   [attr.data-loading]="loading() ? '' : null"
   [attr.type]="type()"
   [attr.aria-busy]="loading() ? 'true' : null"
+  [attr.title]="title()"
+  [attr.aria-describedby]="ariaDescribedBy()"
   [disabled]="interactionDisabled()"
 >
   <span class="button__label">

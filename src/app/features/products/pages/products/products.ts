@@ -12,12 +12,14 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { ProductCard } from '../../../../shared/ui/product-card/product-card';
 import { Pagination } from '../../../../shared/ui/pagination/pagination';
+import { CartStore } from '../../../../core/cart/data-access/cart.store';
 import {
   CategoryFilter,
   CategoryFilterOption,
 } from '../../components/category-filter/category-filter';
 import { ProductsStore } from '../../data-access/products.store';
 import { ProductQuery, ProductQueryInput } from '../../models/product-query.models';
+import { ProductSortBy, ProductSortOrder } from '../../models/product-query.models';
 import {
   isCanonicalProductQueryInput,
   normalizeProductQuery,
@@ -36,14 +38,19 @@ export class ProductsPage {
   readonly page = input<string | undefined>();
   readonly search = input<string | undefined>();
   readonly category = input<string | undefined>();
+  readonly sortBy = input<string | undefined>();
+  readonly order = input<string | undefined>();
 
   private readonly productsStore = inject(ProductsStore);
+  protected readonly cartStore = inject(CartStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly routeQueryInput = computed<ProductQueryInput>(() => ({
     page: this.page(),
     search: this.search(),
     category: this.category(),
+    sortBy: this.sortBy(),
+    order: this.order(),
   }));
   protected readonly routeQuery = computed(() => normalizeProductQuery(this.routeQueryInput()), {
     equal: productQueriesEqual,
@@ -89,7 +96,21 @@ export class ProductsPage {
       return 'Loading products';
     }
 
-    return `${total} ${total === 1 ? 'product' : 'products'}`;
+    return `(${total}) Products Found`;
+  });
+  protected readonly sortOptions: readonly {
+    readonly value: string;
+    readonly label: string;
+  }[] = [
+    { value: 'rating:desc', label: 'Popularity' },
+    { value: 'title:asc', label: 'Name: A-Z' },
+    { value: 'title:desc', label: 'Name: Z-A' },
+    { value: 'price:asc', label: 'Price: Low to high' },
+    { value: 'price:desc', label: 'Price: High to low' },
+  ];
+  protected readonly sortKey = computed(() => {
+    const query = this.routeQuery();
+    return `${query.sortBy}:${query.order}`;
   });
   protected readonly areCategoriesLoading = this.productsStore.areCategoriesLoading;
   protected readonly categoriesError = this.productsStore.categoriesError;
@@ -162,6 +183,36 @@ export class ProductsPage {
     this.productsStore.retryProducts();
   }
 
+  protected addToCart(productId: number): void {
+    this.cartStore.addProduct(productId);
+  }
+
+  protected changeSort(value: string): void {
+    const [sortBy, order] = value.split(':');
+
+    if (!isProductSortBy(sortBy) || !isProductSortOrder(order)) {
+      return;
+    }
+
+    this.queryNavigationError.set(null);
+
+    void this.router
+      .navigate([], {
+        relativeTo: this.route,
+        queryParams: {
+          ...toProductQueryParams({
+            ...this.routeQuery(),
+            page: 1,
+            sortBy,
+            order,
+          }),
+        },
+      })
+      .catch(() => {
+        this.queryNavigationError.set('Unable to update product sorting. Please try again.');
+      });
+  }
+
   protected changePage(page: number): void {
     this.queryNavigationError.set(null);
 
@@ -193,4 +244,12 @@ export class ProductsPage {
 
     return knownCategory ?? category.replaceAll('-', ' ');
   }
+}
+
+function isProductSortBy(value: string | undefined): value is ProductSortBy {
+  return value === 'title' || value === 'price' || value === 'rating';
+}
+
+function isProductSortOrder(value: string | undefined): value is ProductSortOrder {
+  return value === 'asc' || value === 'desc';
 }
