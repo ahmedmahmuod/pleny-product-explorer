@@ -56,7 +56,11 @@
 .text-field__message {
   color: var(--color-text-muted);
   font-size: var(--font-size-body-sm);
-  line-height: var(--line-height-tight);
+  line-height: var(--line-height-xs);
+}
+
+.text-field__message-slot {
+  min-height: var(--line-height-xs);
 }
 
 .text-field__message--error {

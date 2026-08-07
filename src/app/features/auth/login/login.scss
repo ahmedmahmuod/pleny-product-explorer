@@ -1,81 +1,5 @@
 :host {
-  display: grid;
-  min-height: 100dvh;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  background: var(--color-canvas);
-  color: var(--color-text);
-}
-
-header {
-  display: grid;
-  height: var(--layout-header-height);
-  align-items: center;
-  border-block-end: var(--border-width-divider) solid var(--color-border-divider);
-}
-
-nav,
-.footer-content {
-  width: min(100%, var(--layout-content-max));
-  margin-inline: auto;
-  padding-inline: var(--space-12);
-}
-
-nav {
-  display: grid;
-  height: var(--layout-header-content-height);
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--space-13);
-}
-
-.brand {
-  display: inline-flex;
-  width: 142px;
-  height: var(--logo-size);
-  align-items: center;
-  gap: var(--space-3);
-  color: inherit;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-body);
-  text-decoration: none;
-}
-
-.brand-logo {
   display: block;
-  width: var(--logo-size);
-  height: var(--logo-size);
-  flex: 0 0 auto;
-  object-fit: contain;
-}
-
-.brand-logo--large {
-  width: var(--logo-size-large);
-  height: var(--logo-size-large);
-  margin-inline: auto;
-}
-
-header .brand {
-  color: var(--color-text-black);
-}
-
-.nav-link {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-body);
-  text-decoration: none;
-}
-
-.home-link {
-  justify-self: start;
-}
-
-.login-link {
-  justify-self: end;
-}
-
-main {
   padding: var(--space-17) var(--space-12) var(--space-14);
 }
 
@@ -84,6 +8,13 @@ main {
   width: min(100%, var(--layout-form-max));
   gap: var(--space-11);
   margin-inline: auto;
+}
+
+.brand-logo {
+  width: var(--logo-size-large);
+  height: var(--logo-size-large);
+  margin-inline: auto;
+  object-fit: contain;
 }
 
 .introduction {
@@ -116,30 +47,10 @@ main {
 
 form {
   display: grid;
-  gap: var(--space-10);
+  gap: var(--space-8);
   margin-block-start: var(--space-3);
 }
 
-form app-button {
+app-button {
   margin-block-start: var(--space-1);
-}
-
-footer {
-  background: var(--color-footer);
-  color: var(--color-footer-text);
-}
-
-.footer-content {
-  display: flex;
-  min-height: var(--layout-footer-height);
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-15);
-  padding-block: var(--space-14);
-}
-
-footer small {
-  color: var(--color-text-subtle);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-body);
 }

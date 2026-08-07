@@ -1,67 +1,37 @@
-<header>
-  <nav aria-label="Primary navigation">
-    <a class="brand" routerLink="/" aria-label="ClickTik home">
-      <img class="brand-logo" src="assets/images/logo.png" alt="Logo" width="48" height="48" />
-      <span>ClickTik</span>
-    </a>
+<section class="login-card" aria-labelledby="login-title">
+  <img class="brand-logo" src="assets/images/logo.png" alt="Logo" width="48" height="48" />
 
-    <a class="nav-link home-link" routerLink="/">Home</a>
-    <a class="nav-link login-link" routerLink="/login" aria-current="page">Log in</a>
-  </nav>
-</header>
-
-<main>
-  <section class="login-card" aria-labelledby="login-title">
-    <img class="brand-logo brand-logo--large" src="assets/images/logo.png" alt="Logo" width="48" height="48" />
-
-    <div class="introduction">
-      <h1 id="login-title">Log in to your account</h1>
-      <p>Welcome back! Please enter your details.</p>
-    </div>
-
-    @if (authStore.error()) {
-      <p class="server-error" role="alert" aria-live="assertive">
-        {{ authStore.error() }}
-      </p>
-    }
-
-    <form novalidate (submit)="submit($event)">
-      <app-text-field
-        [formField]="loginForm.username"
-        label="Username"
-        autocomplete="username"
-        placeholder="Enter your username"
-        [error]="usernameError()"
-      />
-
-      <app-text-field
-        [formField]="loginForm.password"
-        label="Password"
-        type="password"
-        autocomplete="current-password"
-        placeholder="Enter your password"
-        [error]="passwordError()"
-      />
-
-      <app-button
-        type="submit"
-        size="large"
-        [loading]="authStore.isLoading()"
-        loadingLabel="Signing in"
-      >
-        Sign in
-      </app-button>
-    </form>
-  </section>
-</main>
-
-<footer>
-  <div class="footer-content">
-    <span class="brand">
-      <img class="brand-logo" src="assets/images/logo.png" alt="" width="48" height="48" />
-      <span>ClickTik</span>
-    </span>
-
-    <small>© 2022 ClickTik</small>
+  <div class="introduction">
+    <h1 id="login-title">Log in to your account</h1>
+    <p>Welcome back! Please enter your details.</p>
   </div>
-</footer>
+
+  @if (authStore.error()) {
+    <p class="server-error" role="alert" aria-live="assertive">
+      {{ authStore.error() }}
+    </p>
+  }
+
+  <form novalidate (submit)="submit($event)">
+    <app-text-field
+      [formField]="loginForm.username"
+      label="Username"
+      autocomplete="username"
+      placeholder="Enter your username"
+      [error]="usernameError()"
+    />
+
+    <app-text-field
+      [formField]="loginForm.password"
+      label="Password"
+      type="password"
+      autocomplete="current-password"
+      placeholder="Enter your password"
+      [error]="passwordError()"
+    />
+
+    <app-button type="submit" size="large" [loading]="authStore.isLoading()" loadingLabel="Signing in">
+      Sign in
+    </app-button>
+  </form>
+</section>

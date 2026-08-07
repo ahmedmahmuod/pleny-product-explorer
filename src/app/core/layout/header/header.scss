@@ -1,0 +1,57 @@
+:host {
+  display: block;
+}
+
+header {
+  display: grid;
+  height: var(--layout-header-height);
+  align-items: center;
+  border-block-end: var(--border-width-default) solid var(--color-border-divider);
+}
+
+nav {
+  display: grid;
+  width: min(100%, var(--layout-content-max));
+  height: var(--layout-header-content-height);
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-13);
+  margin-inline: auto;
+  padding-inline: var(--space-12);
+}
+
+.brand {
+  display: inline-flex;
+  width: 142px;
+  height: var(--logo-size);
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-black);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  text-decoration: none;
+}
+
+.brand-logo {
+  width: var(--logo-size);
+  height: var(--logo-size);
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.nav-link {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  text-decoration: none;
+}
+
+.home-link {
+  justify-self: start;
+}
+
+.login-link {
+  justify-self: end;
+}
