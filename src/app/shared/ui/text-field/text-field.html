@@ -7,9 +7,10 @@
   </label>
 
   <input
+    #inputElement
     class="text-field__control"
     [id]="controlId()"
-    [attr.name]="name()"
+    [attr.name]="name() || null"
     [type]="type()"
     [attr.autocomplete]="autocomplete()"
     [attr.placeholder]="placeholder()"
