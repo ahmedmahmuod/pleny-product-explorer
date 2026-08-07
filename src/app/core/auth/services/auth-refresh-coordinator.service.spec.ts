@@ -3,8 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { EMPTY, Observable, Subject, throwError } from 'rxjs';
 
 import { AuthTokens } from '../models/auth.models';
-import { AuthStore } from '../stores/auth.store';
-import { AuthApiService } from './auth-api.service';
+import { AuthStore } from '../data-access/auth.store';
+import { AuthApiService } from '../data-access/auth-api.service';
 import { AuthRefreshCoordinator } from './auth-refresh-coordinator.service';
 
 class AuthApiStub {

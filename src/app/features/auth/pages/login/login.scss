@@ -1,0 +1,56 @@
+:host {
+  display: block;
+  padding: var(--space-17) var(--space-12) var(--space-14);
+}
+
+.login-card {
+  display: grid;
+  width: min(100%, var(--layout-form-max));
+  gap: var(--space-11);
+  margin-inline: auto;
+}
+
+.brand-logo {
+  width: var(--logo-size-large);
+  height: var(--logo-size-large);
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+.introduction {
+  display: grid;
+  gap: var(--space-6);
+  text-align: center;
+
+  h1 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-login-title);
+    color: var(--color-text-strong);
+  }
+
+  p {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
+  }
+}
+
+.server-error {
+  border: var(--border-width-default) solid var(--color-danger);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-surface);
+  color: var(--color-danger);
+  padding: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+form {
+  display: grid;
+  gap: var(--space-8);
+  margin-block-start: var(--space-3);
+}
+
+app-button {
+  margin-block-start: var(--space-1);
+}
