@@ -1,8 +1,14 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient, withFetch } from '@angular/common/http';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
+} from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
+import { AuthSessionStorage } from './core/auth/services/auth-session-storage.service';
+import { BrowserAuthSessionStorage } from './core/auth/services/browser-auth-session-storage.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -10,5 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideHttpClient(withFetch()),
     provideRouter(routes, withComponentInputBinding()),
+    BrowserAuthSessionStorage,
+    { provide: AuthSessionStorage, useExisting: BrowserAuthSessionStorage },
   ],
 };
