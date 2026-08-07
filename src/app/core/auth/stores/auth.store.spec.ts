@@ -4,7 +4,7 @@ import { EMPTY, Observable, of, Subject, throwError } from 'rxjs';
 
 import { AuthCredentials, AuthSession, AuthTokens } from '../models/auth.models';
 import { AuthApiService } from '../services/auth-api.service';
-import { AuthSessionStorage } from '../services/auth-session-storage.service';
+import { AuthSessionStorage } from '../contracts/auth-session-storage';
 import { AuthStore } from './auth.store';
 
 class AuthApiStub {

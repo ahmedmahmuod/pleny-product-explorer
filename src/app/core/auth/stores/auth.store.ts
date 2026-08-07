@@ -13,7 +13,7 @@ import { catchError, EMPTY, exhaustMap, finalize, pipe, tap } from 'rxjs';
 
 import { AuthCredentials, AuthSession, AuthTokens } from '../models/auth.models';
 import { AuthApiService } from '../services/auth-api.service';
-import { AuthSessionStorage } from '../services/auth-session-storage.service';
+import { AuthSessionStorage } from '../contracts/auth-session-storage';
 
 type AuthStatus = 'idle' | 'loading';
 
