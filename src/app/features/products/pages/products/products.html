@@ -39,7 +39,12 @@
 
         <label class="products-page__sort">
           <span>Sort By:</span>
-          <select #sortSelect aria-label="Sort products" [value]="sortKey()" (change)="changeSort(sortSelect.value)">
+          <select
+            #sortSelect
+            aria-label="Sort products"
+            [value]="sortKey()"
+            (change)="changeSort(sortSelect.value)"
+          >
             @for (option of sortOptions; track option.value) {
               <option [value]="option.value">{{ option.label }}</option>
             }
@@ -81,7 +86,7 @@
               (addToCart)="addToCart($event)"
             />
           } @empty {
-            <div class="products-page__feedback">
+            <div class="products-page__feedback products-page__empty">
               <p>No products match the current filters.</p>
             </div>
           }
