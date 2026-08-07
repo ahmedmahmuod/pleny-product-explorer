@@ -2,23 +2,7 @@
   <div class="products-page__header">
     <h1 id="products-title">{{ heading() }}</h1>
 
-    <nav class="products-page__breadcrumbs" aria-label="Breadcrumb">
-      <a routerLink="/products" [queryParams]="{ page: 1 }">Home</a>
-      <span aria-hidden="true">/</span>
-      <a routerLink="/products" [queryParams]="{ page: 1 }">Products</a>
-
-      @if (breadcrumbCategory()) {
-        <span aria-hidden="true">/</span>
-        <a routerLink="/products" [queryParams]="{ page: 1, category: routeQuery().category }">
-          {{ breadcrumbCategory() }}
-        </a>
-      }
-
-      @if (routeQuery().search) {
-        <span aria-hidden="true">/</span>
-        <span aria-current="page">{{ routeQuery().search }}</span>
-      }
-    </nav>
+    <app-breadcrumb [items]="breadcrumbItems()" />
   </div>
 
   <div class="products-page__content">

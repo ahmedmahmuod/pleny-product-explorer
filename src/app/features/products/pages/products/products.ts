@@ -8,10 +8,11 @@ import {
   linkedSignal,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { ProductCard } from '../../../../shared/ui/product-card/product-card';
 import { Pagination } from '../../../../shared/ui/pagination/pagination';
+import { Breadcrumb, BreadcrumbItem } from '../../../../shared/ui/breadcrumb/breadcrumb';
 import { CartStore } from '../../../../core/cart/data-access/cart.store';
 import {
   CategoryFilter,
@@ -29,7 +30,7 @@ import {
 
 @Component({
   selector: 'app-products-page',
-  imports: [CategoryFilter, ProductCard, Pagination, RouterLink],
+  imports: [Breadcrumb, CategoryFilter, ProductCard, Pagination],
   templateUrl: './products.html',
   styleUrl: './products.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -84,11 +85,37 @@ export class ProductsPage {
 
     return 'Products';
   });
-  protected readonly breadcrumbCategory = computed(() => {
-    const category = this.routeQuery().category;
 
-    return category ? this.categoryLabel(category) : null;
+  protected readonly breadcrumbItems = computed<readonly BreadcrumbItem[]>(() => {
+    const query = this.routeQuery();
+    const items: BreadcrumbItem[] = [
+      { id: 'home', label: 'Home', route: '/products', queryParams: { page: 1 } },
+      {
+        id: 'products',
+        label: 'Products',
+        route: '/products',
+        queryParams: { page: 1 },
+        current: !query.category && !query.search,
+      },
+    ];
+
+    if (query.category) {
+      items.push({
+        id: 'category',
+        label: this.categoryLabel(query.category),
+        route: '/products',
+        queryParams: { page: 1, category: query.category },
+        current: !query.search,
+      });
+    }
+
+    if (query.search) {
+      items.push({ id: 'search', label: query.search, current: true });
+    }
+
+    return items;
   });
+
   protected readonly resultSummary = computed(() => {
     const total = this.total();
 
@@ -98,20 +125,20 @@ export class ProductsPage {
 
     return `(${total}) Products Found`;
   });
-  protected readonly sortOptions: readonly {
-    readonly value: string;
-    readonly label: string;
-  }[] = [
+
+  protected readonly sortOptions: readonly { readonly value: string; readonly label: string }[] = [
     { value: 'rating:desc', label: 'Popularity' },
     { value: 'title:asc', label: 'Name: A-Z' },
     { value: 'title:desc', label: 'Name: Z-A' },
     { value: 'price:asc', label: 'Price: Low to high' },
     { value: 'price:desc', label: 'Price: High to low' },
   ];
+
   protected readonly sortKey = computed(() => {
     const query = this.routeQuery();
     return `${query.sortBy}:${query.order}`;
   });
+
   protected readonly areCategoriesLoading = this.productsStore.areCategoriesLoading;
   protected readonly categoriesError = this.productsStore.categoriesError;
 

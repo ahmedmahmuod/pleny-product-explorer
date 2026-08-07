@@ -1,0 +1,13 @@
+<nav class="breadcrumb" [attr.aria-label]="ariaLabel()">
+  @for (item of items(); track item.id; let isFirst = $first) {
+    @if (!isFirst) {
+      <span class="breadcrumb__separator" aria-hidden="true">/</span>
+    }
+
+    @if (item.route && !item.current) {
+      <a [routerLink]="item.route" [queryParams]="item.queryParams">{{ item.label }}</a>
+    } @else {
+      <span [attr.aria-current]="item.current ? 'page' : null">{{ item.label }}</span>
+    }
+  }
+</nav>
