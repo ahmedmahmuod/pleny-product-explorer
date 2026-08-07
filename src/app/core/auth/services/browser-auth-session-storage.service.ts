@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 
 import type { AuthSession } from '../models/auth.models';
 import { parseAuthSession } from '../utils/auth-session.parser';
-import { AuthSessionStorage } from './auth-session-storage.service';
+import { AuthSessionStorage } from '../contracts/auth-session-storage';
 
 export const AUTH_SESSION_STORAGE_KEY = 'pleny.auth.session';
 
