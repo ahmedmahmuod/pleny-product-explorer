@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { EMPTY, Observable, of, Subject, throwError } from 'rxjs';
 
 import { AuthCredentials, AuthSession, AuthTokens } from '../models/auth.models';
-import { AuthApiService } from '../services/auth-api.service';
+import { AuthApiService } from './auth-api.service';
 import { AuthSessionStorage } from '../contracts/auth-session-storage';
 import { AuthStore } from './auth.store';
 

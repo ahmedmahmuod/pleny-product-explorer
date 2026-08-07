@@ -1,15 +1,30 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
-import { disabled, type FieldTree, form, FormField, required, validate } from '@angular/forms/signals';
-import { Router, RouterLink } from '@angular/router';
-import { AuthStore } from '../../../core/auth/stores/auth.store';
-import { getSafeAuthReturnUrl } from '../../../core/auth/utils/auth-return-url';
-import { Button } from '../../../shared/ui/button/button';
-import { TextField } from '../../../shared/ui/text-field/text-field';
-import { AuthCredentials } from '../../../core/auth/models/auth.models';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
+import {
+  disabled,
+  type FieldTree,
+  form,
+  FormField,
+  required,
+  validate,
+} from '@angular/forms/signals';
+import { Router } from '@angular/router';
+import { AuthCredentials } from '../../../../core/auth/models/auth.models';
+import { AuthStore } from '../../../../core/auth/data-access/auth.store';
+import { getSafeAuthReturnUrl } from '../../../../core/auth/utils/auth-return-url';
+import { Button } from '../../../../shared/ui/button/button';
+import { TextField } from '../../../../shared/ui/text-field/text-field';
 
 @Component({
   selector: 'app-login-page',
-  imports: [RouterLink, FormField, Button, TextField],
+  imports: [FormField, Button, TextField],
   templateUrl: './login.html',
   styleUrl: './login.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,7 +41,9 @@ export class LoginPage {
     (credentials) => {
       required(credentials.username, { message: 'Username is required.' });
       validate(credentials.username, ({ value }) =>
-          value() && !value().trim() ? { kind: 'required', message: 'Username is required.' } : undefined,
+        value() && !value().trim()
+          ? { kind: 'required', message: 'Username is required.' }
+          : undefined,
       );
       required(credentials.password, { message: 'Password is required.' });
       disabled(credentials.username, () => this.authStore.isLoading());

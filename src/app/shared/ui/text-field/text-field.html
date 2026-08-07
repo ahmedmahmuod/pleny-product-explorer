@@ -22,13 +22,15 @@
     (input)="updateValue($event)"
   />
 
-  @if (error()) {
-    <p class="text-field__message text-field__message--error" [id]="errorId()" role="alert">
-      {{ error() }}
-    </p>
-  } @else if (hint()) {
-    <p class="text-field__message" [id]="hintId()">
-      {{ hint() }}
-    </p>
-  }
+  <div class="text-field__message-slot">
+    @if (error()) {
+      <p class="text-field__message text-field__message--error" [id]="errorId()" role="alert">
+        {{ error() }}
+      </p>
+    } @else if (hint()) {
+      <p class="text-field__message" [id]="hintId()">
+        {{ hint() }}
+      </p>
+    }
+  </div>
 </div>

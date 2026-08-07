@@ -132,6 +132,24 @@ describe('TextField', () => {
     expect(fixture.nativeElement.querySelector('#account-email-hint')).toBeNull();
   });
 
+  it('keeps a message slot mounted when hint and error content change', () => {
+    host.hint.set(null);
+    fixture.detectChanges();
+
+    const messageSlot = fixture.nativeElement.querySelector(
+      '.text-field__message-slot',
+    ) as HTMLElement;
+
+    expect(messageSlot).not.toBeNull();
+    expect(messageSlot.childElementCount).toBe(0);
+
+    host.error.set('Enter a valid account email.');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.text-field__message-slot')).toBe(messageSlot);
+    expect(messageSlot.textContent).toContain('Enter a valid account email.');
+  });
+
   it('forwards required and disabled semantics', () => {
     host.required.set(true);
     host.disabled.set(true);

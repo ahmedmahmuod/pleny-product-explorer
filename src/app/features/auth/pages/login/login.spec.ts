@@ -1,18 +1,22 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter, Router, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
-import { routes } from '../../../app.routes';
-import { AuthCredentials } from '../../../core/auth/models/auth.models';
-import { AuthStore } from '../../../core/auth/stores/auth.store';
+import { routes } from '../../../../app.routes';
+import { AuthCredentials, AuthUser } from '../../../../core/auth/models/auth.models';
+import { AuthStore } from '../../../../core/auth/data-access/auth.store';
+import { AppLayout } from '../../../../core/layout/app-layout/app-layout';
 import { LoginPage } from './login';
 
 class AuthStoreStub {
   readonly isAuthenticated = signal(false);
   readonly isLoading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly user = signal<AuthUser | null>(null);
   readonly login = vi.fn((_credentials: AuthCredentials): void => undefined);
+  readonly logout = vi.fn();
 }
 
 describe('LoginPage', () => {
@@ -21,6 +25,8 @@ describe('LoginPage', () => {
   let page: LoginPage;
 
   const routeElement = (): HTMLElement => harness.routeNativeElement as HTMLElement;
+  const activeLoginPage = (): LoginPage =>
+    harness.fixture.debugElement.query(By.directive(LoginPage)).componentInstance as LoginPage;
   const usernameInput = (): HTMLInputElement =>
     routeElement().querySelector('input[autocomplete="username"]') as HTMLInputElement;
   const passwordInput = (): HTMLInputElement =>
@@ -39,7 +45,8 @@ describe('LoginPage', () => {
     });
 
     harness = await RouterTestingHarness.create();
-    page = await harness.navigateByUrl('/login', LoginPage);
+    await harness.navigateByUrl('/login', AppLayout);
+    page = activeLoginPage();
   });
 
   it('loads lazily at the login route with semantic page landmarks', () => {
@@ -107,7 +114,8 @@ describe('LoginPage', () => {
   });
 
   it('redirects an authenticated user to the safe return URL', async () => {
-    page = await harness.navigateByUrl('/login?returnUrl=%2Fproducts%3Fpage%3D2', LoginPage);
+    await harness.navigateByUrl('/login?returnUrl=%2Fproducts%3Fpage%3D2', AppLayout);
+    page = activeLoginPage();
     const router = TestBed.inject(Router);
     const navigateByUrl = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
 
