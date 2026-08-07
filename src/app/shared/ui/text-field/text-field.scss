@@ -8,8 +8,8 @@
 }
 
 .text-field__label {
-  color: var(--color-text);
-  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-sm);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-tight);
 }
@@ -20,19 +20,22 @@
 
 .text-field__control {
   width: 100%;
-  min-height: var(--control-height-md);
-  border: 1px solid var(--color-border);
+  height: var(--control-height-md);
+  border: var(--border-width-default) solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  color: var(--color-text);
-  padding-inline: var(--space-3);
+  box-shadow: var(--shadow-input);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+  padding: var(--space-4) var(--space-7);
   transition:
     background-color var(--transition-fast),
     border-color var(--transition-fast),
     color var(--transition-fast);
 
   &::placeholder {
-    color: var(--color-text-subtle);
+    color: var(--color-text-muted);
   }
 
   &:hover:not(:disabled):not([aria-invalid='true']) {
@@ -52,8 +55,8 @@
 
 .text-field__message {
   color: var(--color-text-muted);
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-body);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-tight);
 }
 
 .text-field__message--error {
