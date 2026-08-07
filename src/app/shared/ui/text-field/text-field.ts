@@ -3,9 +3,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   input,
   model,
+  viewChild,
 } from '@angular/core';
+import type { FormValueControl } from '@angular/forms/signals';
 
 export type TextFieldType = 'text' | 'email' | 'password' | 'search' | 'tel' | 'url';
 
@@ -29,10 +32,10 @@ let nextTextFieldId = 0;
   styleUrl: './text-field.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TextField {
+export class TextField implements FormValueControl<string> {
   readonly label = input.required<string>();
   readonly id = input<string | null>(null);
-  readonly name = input<string | null>(null);
+  readonly name = input('');
   readonly type = input<TextFieldType>('text');
   readonly autocomplete = input<TextFieldAutocomplete | null>(null);
   readonly placeholder = input<string | null>(null);
@@ -42,6 +45,7 @@ export class TextField {
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly value = model('');
 
+  private readonly inputElement = viewChild.required<ElementRef<HTMLInputElement>>('inputElement');
   private readonly generatedId = `app-text-field-${nextTextFieldId++}`;
 
   protected readonly controlId = computed(() => this.id() ?? this.generatedId);
@@ -61,5 +65,9 @@ export class TextField {
     if (inputElement instanceof HTMLInputElement) {
       this.value.set(inputElement.value);
     }
+  }
+
+  focus(options?: FocusOptions): void {
+    this.inputElement().nativeElement.focus(options);
   }
 }

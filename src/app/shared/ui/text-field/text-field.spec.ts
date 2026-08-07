@@ -24,7 +24,7 @@ import { TextField, TextFieldAutocomplete, TextFieldType } from './text-field';
 })
 class TextFieldTestHost {
   readonly fieldId = signal<string | null>('account-email');
-  readonly name = signal<string | null>('email');
+  readonly name = signal('email');
   readonly type = signal<TextFieldType>('email');
   readonly autocomplete = signal<TextFieldAutocomplete | null>('email');
   readonly placeholder = signal<string | null>('you@example.com');
@@ -144,5 +144,17 @@ describe('TextField', () => {
     expect(inputElement().required).toBe(true);
     expect(inputElement().disabled).toBe(true);
     expect(requiredMarker.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('focuses its native input for form-level error recovery', () => {
+    const fieldFixture = TestBed.createComponent(TextField);
+
+    fieldFixture.componentRef.setInput('label', 'Username');
+    fieldFixture.detectChanges();
+    fieldFixture.componentInstance.focus();
+
+    expect(document.activeElement).toBe(
+      fieldFixture.nativeElement.querySelector('input') as HTMLInputElement,
+    );
   });
 });
