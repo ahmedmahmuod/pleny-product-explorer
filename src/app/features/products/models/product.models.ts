@@ -11,6 +11,15 @@ export interface Product {
   readonly brand?: string;
   readonly thumbnail: string;
   readonly images: readonly string[];
+  readonly reviews?: readonly ProductReview[];
+}
+
+export interface ProductReview {
+  readonly rating: number;
+  readonly comment: string;
+  readonly date: string;
+  readonly reviewerName: string;
+  readonly reviewerEmail: string;
 }
 
 export interface ProductCategory {

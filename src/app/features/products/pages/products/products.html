@@ -1,3 +1,28 @@
 <section aria-labelledby="products-title">
+  <h1 id="products-title">Products</h1>
 
+  <app-select
+    id="product-category"
+    name="category"
+    label="Category"
+    placeholder="All categories"
+    loadingLabel="Loading product categories"
+    [options]="categoryOptions()"
+    [value]="categoryDraft()"
+    [loading]="areCategoriesLoading()"
+    [error]="categoriesError()"
+    (valueChange)="changeCategory($event)"
+  />
+
+  @if (categoriesError()) {
+    <app-button type="button" variant="secondary" size="small" (click)="retryCategories()">
+      Retry categories
+    </app-button>
+  }
+
+  @if (queryNavigationError()) {
+    <p role="alert" aria-live="assertive">
+      {{ queryNavigationError() }}
+    </p>
+  }
 </section>

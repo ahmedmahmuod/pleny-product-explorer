@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 
@@ -6,6 +6,12 @@ import { AuthStore } from '../../../auth/data-access/auth.store';
 import { AuthUser } from '../../../auth/models/auth.models';
 import { ThemeService } from '../../../theme/theme.service';
 import { AccountMenu } from './account-menu';
+
+@Component({
+  template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class EmptyRoutePage {}
 
 class AuthStoreStub {
   readonly user = signal<AuthUser | null>(null);
@@ -29,7 +35,7 @@ describe('AccountMenu', () => {
     TestBed.configureTestingModule({
       imports: [AccountMenu],
       providers: [
-        provideRouter([]),
+        provideRouter([{ path: 'login', component: EmptyRoutePage }]),
         { provide: AuthStore, useValue: authStore },
         { provide: ThemeService, useValue: theme },
       ],
@@ -86,9 +92,10 @@ describe('AccountMenu', () => {
     const menu = menuElement();
     menu.open = true;
 
-    (fixture.nativeElement as HTMLElement)
-      .querySelector<HTMLButtonElement>('.logout-button')
-      ?.click();
+    const logoutButton = (fixture.nativeElement as HTMLElement).querySelector(
+      '.logout-button',
+    ) as HTMLButtonElement;
+    logoutButton.click();
     await fixture.whenStable();
 
     expect(authStore.logout).toHaveBeenCalledOnce();
