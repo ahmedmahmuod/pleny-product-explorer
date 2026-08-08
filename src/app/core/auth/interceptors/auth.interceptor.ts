@@ -4,6 +4,7 @@ import { catchError, switchMap, throwError } from 'rxjs';
 
 import { API_BASE_URL } from '../../config/api.config';
 import { AuthRefreshCoordinator } from '../services/auth-refresh-coordinator.service';
+import { AuthSessionStorage } from '../contracts/auth-session-storage';
 import { AuthStore } from '../data-access/auth.store';
 
 const REFRESH_RETRY = new HttpContextToken(() => false);
@@ -11,6 +12,7 @@ const REFRESH_RETRY = new HttpContextToken(() => false);
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const authStore = inject(AuthStore);
   const refreshCoordinator = inject(AuthRefreshCoordinator);
+  const sessionStorage = inject(AuthSessionStorage);
   const apiBaseUrl = inject(API_BASE_URL).replace(/\/+$/, '');
   const requestUrl = request.url.split('?')[0].replace(/\/+$/, '');
   const isApiRequest = request.url === apiBaseUrl || request.url.startsWith(`${apiBaseUrl}/`);
@@ -22,6 +24,12 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   }
 
   const accessToken = authStore.accessToken();
+  const persistedSession = sessionStorage.read();
+
+  if (!persistedSession || persistedSession.accessToken !== accessToken) {
+    authStore.logout();
+    return throwError(() => createMissingSessionError());
+  }
 
   const authenticatedRequest = accessToken
     ? request.clone({
@@ -37,7 +45,14 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
         return throwError(() => error);
       }
 
-      if (request.context.get(REFRESH_RETRY) || !authStore.refreshToken()) {
+      const currentPersistedSession = sessionStorage.read();
+
+      if (
+        request.context.get(REFRESH_RETRY) ||
+        !authStore.refreshToken() ||
+        !currentPersistedSession ||
+        currentPersistedSession.refreshToken !== authStore.refreshToken()
+      ) {
         authStore.logout();
         return throwError(() => error);
       }
@@ -64,3 +79,10 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
     }),
   );
 };
+
+function createMissingSessionError(): HttpErrorResponse {
+  return new HttpErrorResponse({
+    status: 401,
+    statusText: 'Authentication session is no longer available',
+  });
+}

@@ -23,6 +23,8 @@ This folder owns authentication mechanics, not authentication screens. Login UI 
 
 The cookie adapter uses `Path=/`, `SameSite=Lax`, a seven-day `Max-Age`, and `Secure` when the app runs over HTTPS. Because a frontend cannot set `HttpOnly`, these are still JavaScript-readable cookies; production authentication should issue secure HttpOnly cookies from the server.
 
+Before each protected API request, the interceptor re-reads the persisted session and compares its access token with the in-memory token. If cookies were deleted or changed externally, the interceptor logs out the in-memory store and rejects the stale request immediately instead of sending it with an old bearer token.
+
 The implementation is suitable for the DummyJSON assessment, but it is not a production security boundary: browser-readable tokens remain exposed to an XSS vulnerability and DummyJSON tokens are demonstration credentials.
 
 ## Extension rules
