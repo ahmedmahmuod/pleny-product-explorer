@@ -46,8 +46,9 @@
 
   .search-region {
     position: absolute;
+    top: 50%;
     left: 50%;
-    width: clamp(8.5rem, 42vw, 20rem);
-    transform: translateX(-50%);
+    width: min(40vw, var(--header-search-width-mobile));
+    transform: translate(-50%, -50%);
   }
 }

@@ -48,6 +48,10 @@ nav {
   object-fit: contain;
 }
 
+.nav-link {
+  text-decoration: none;
+}
+
 .authenticated-actions {
   display: flex;
   min-width: 0;
@@ -56,6 +60,10 @@ nav {
 }
 
 @media (max-width: 47.999rem) {
+  header {
+    height: var(--layout-header-height-mobile);
+  }
+
   nav {
     position: relative;
     gap: var(--space-3);
@@ -79,5 +87,4 @@ nav {
     justify-content: flex-end;
     gap: var(--space-3);
   }
-
 }
