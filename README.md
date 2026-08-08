@@ -4,6 +4,12 @@ An Angular 21 product explorer built as a technical-assessment application. User
 
 The project is intentionally small and explainable: standalone OnPush components, a feature-based folder structure, typed API services, NgRx SignalStore for application state, and RxJS only where asynchronous workflows need cancellation or coordination.
 
+## Live demo
+
+[Open the live application](https://your-live-app-url.example.com)
+
+> Deployment placeholder: replace `https://your-live-app-url.example.com` with the real application URL after deployment.
+
 ## What is included
 
 - Angular 21 standalone application with zoneless change detection.
@@ -35,6 +41,27 @@ The Products route accepts query parameters such as:
 ```
 
 The URL is the source of truth. Refresh, direct links, and browser back/forward navigation restore the same product view.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><strong>Products page</strong></td>
+    <td align="center"><strong>Login page</strong></td>
+  </tr>
+  <tr>
+    <td><img src="src/assets/images/screenshots/SCR-20260808-seud.jpeg" alt="Desktop products page with category filters and product cards" width="520" /></td>
+    <td><img src="src/assets/images/screenshots/SCR-20260808-sfxv.png" alt="Desktop login page" width="520" /></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Login page on mobile</strong></td>
+    <td align="center"><strong>Search results</strong></td>
+  </tr>
+  <tr>
+    <td><img src="src/assets/images/screenshots/SCR-20260808-sine.png" alt="Responsive mobile login page" width="520" /></td>
+    <td><img src="src/assets/images/screenshots/products-page.png" alt="Product search results for iPhone" width="520" /></td>
+  </tr>
+</table>
 
 ## Quick start
 
