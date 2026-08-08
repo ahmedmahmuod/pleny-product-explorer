@@ -15,13 +15,15 @@ This folder owns authentication mechanics, not authentication screens. Login UI 
 ## Authentication flow
 
 1. Login calls `AuthStore.login`, which uses the typed auth API.
-2. A successful session is stored through the `AuthSessionStorage` contract.
+2. A successful session is stored through the `AuthSessionStorage` contract, implemented in the browser with separate access-token, refresh-token, and user cookies.
 3. The guard allows protected routes only when the store has an authenticated user.
 4. The interceptor attaches the access token to normal API requests.
 5. A 401 starts one coordinated refresh request; concurrent failed requests wait for that result.
 6. The original request is retried once with the new token. Refresh failure clears the session and safely returns the user to login.
 
-The implementation is suitable for the DummyJSON assessment. It is not a production security boundary: browser storage is exposed to JavaScript and DummyJSON tokens are demonstration credentials.
+The cookie adapter uses `Path=/`, `SameSite=Lax`, a seven-day `Max-Age`, and `Secure` when the app runs over HTTPS. Because a frontend cannot set `HttpOnly`, these are still JavaScript-readable cookies; production authentication should issue secure HttpOnly cookies from the server.
+
+The implementation is suitable for the DummyJSON assessment, but it is not a production security boundary: browser-readable tokens remain exposed to an XSS vulnerability and DummyJSON tokens are demonstration credentials.
 
 ## Extension rules
 

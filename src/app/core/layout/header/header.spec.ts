@@ -99,7 +99,7 @@ describe('AppHeader', () => {
       '/assets/images/Cart.svg',
     );
     expect(summary.textContent).toContain('Account');
-    expect(summary.getAttribute('aria-label')).toBe('Account for Emily Johnson');
+    expect(summary.getAttribute('aria-label')).toBe('Welcome Emily Johnson');
   });
 
   it('debounces normalized search into the product URL and preserves category', async () => {

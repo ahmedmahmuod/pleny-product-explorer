@@ -101,7 +101,7 @@ describe('AccountMenu', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.account-menu__identity')?.textContent).toContain(
-      'Account for Emily Johnson',
+      'Welcome Emily Johnson',
     );
   });
 
