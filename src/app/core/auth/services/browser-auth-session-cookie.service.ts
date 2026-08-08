@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 
 import { AuthSessionStorage } from '../contracts/auth-session-storage';
 import type { AuthSession, AuthUser } from '../models/auth.models';
+import { isRecord } from '../../../shared/utilities/is-record';
 
 export const AUTH_ACCESS_TOKEN_COOKIE = 'pleny.auth.access-token';
 export const AUTH_REFRESH_TOKEN_COOKIE = 'pleny.auth.refresh-token';
@@ -91,7 +92,7 @@ export class BrowserAuthSessionCookieService extends AuthSessionStorage {
   private parseUser(serializedUser: string): AuthUser | null {
     const value: unknown = JSON.parse(serializedUser);
 
-    if (!this.isRecord(value)) {
+    if (!isRecord(value)) {
       return null;
     }
 
@@ -116,9 +117,5 @@ export class BrowserAuthSessionCookieService extends AuthSessionStorage {
     }
 
     return { id, username, email, firstName, lastName, gender, image };
-  }
-
-  private isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null;
   }
 }
