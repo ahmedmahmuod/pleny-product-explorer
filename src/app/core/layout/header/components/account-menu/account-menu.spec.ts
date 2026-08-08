@@ -88,6 +88,23 @@ describe('AccountMenu', () => {
     expect(switchElement().checked).toBe(true);
   });
 
+  it('renders the authenticated user label inside the open menu', () => {
+    authStore.user.set({
+      id: 1,
+      username: 'emilys',
+      email: 'emily@example.test',
+      firstName: 'Emily',
+      lastName: 'Johnson',
+      gender: 'female',
+      image: 'https://example.test/emily.png',
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.account-menu__identity')?.textContent).toContain(
+      'Account for Emily Johnson',
+    );
+  });
+
   it('clears the session, closes the menu, and navigates to login on logout', async () => {
     const menu = menuElement();
     menu.open = true;

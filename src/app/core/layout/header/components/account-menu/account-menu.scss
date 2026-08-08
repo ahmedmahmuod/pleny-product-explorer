@@ -64,6 +64,17 @@ svg {
   box-shadow: var(--shadow-sm);
 }
 
+.account-menu__identity {
+  margin: var(--space-3) var(--space-4) var(--space-2);
+  padding-block-end: var(--space-3);
+  border-block-end: var(--border-width-divider) solid var(--color-border-divider);
+  color: var(--color-text);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+
 .theme-option,
 .logout-button {
   display: flex;

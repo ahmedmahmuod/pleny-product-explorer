@@ -31,7 +31,7 @@ export class AccountMenu {
   protected readonly isDark = this.theme.isDark;
   protected readonly accountLabel = computed(() => {
     const user = this.authStore.user();
-    return user ? `Account for ${user.firstName} ${user.lastName}` : 'Account';
+    return user ? `Welcome ${user.firstName} ${user.lastName}` : 'Account';
   });
   protected readonly themeLabel = computed(() => (this.isDark() ? 'Dark mode' : 'Light mode'));
 
