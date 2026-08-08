@@ -33,7 +33,10 @@ export class LoginPage {
   readonly returnUrl = input<string | undefined>();
   protected readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
-  private readonly loginModel = signal<AuthCredentials>({ username: '', password: '' });
+  private readonly loginModel = signal<AuthCredentials>({
+    username: 'emilys',
+    password: 'emilyspass',
+  });
 
   // Angular 21 Signal Forms is experimental, so its use is isolated to this route-level form.
   protected readonly loginForm = form(

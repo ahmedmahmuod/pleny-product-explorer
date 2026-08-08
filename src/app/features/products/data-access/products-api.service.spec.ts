@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { API_BASE_URL } from '../../../core/config/api.config';
-import { ProductCategory, ProductsResponse } from '../models/product.models';
+import { Product, ProductCategory, ProductsResponse } from '../models/product.models';
 import { ProductsApiService } from './products-api.service';
 
 describe('ProductsApiService', () => {
@@ -66,6 +66,18 @@ describe('ProductsApiService', () => {
     request.flush({ ...response, skip: 0 });
   });
 
+  it('sends sortBy and order for sorted product requests', () => {
+    service.getProducts({ limit: 9, skip: 0 }, { sortBy: 'title', order: 'asc' }).subscribe();
+
+    const request = httpTesting.expectOne(
+      (candidate) => candidate.url === 'https://api.example.test/products',
+    );
+
+    expect(request.request.params.get('sortBy')).toBe('title');
+    expect(request.request.params.get('order')).toBe('asc');
+    request.flush({ ...response, skip: 0 });
+  });
+
   it('encodes a category slug and sends pagination', () => {
     service.getProductsByCategory('smart phones', { limit: 9, skip: 9 }).subscribe();
 
@@ -80,7 +92,7 @@ describe('ProductsApiService', () => {
     request.flush({ ...response, skip: 9 });
   });
 
-  it('loads typed category metadata', () => {
+  it('loads category metadata without waiting for product counts', () => {
     const categories: readonly ProductCategory[] = [
       {
         slug: 'smartphones',
@@ -98,5 +110,45 @@ describe('ProductsApiService', () => {
     request.flush(categories);
 
     expect(actual).toEqual(categories);
+    expect(
+      httpTesting.match((candidate) => candidate.url === 'https://api.example.test/products'),
+    ).toHaveLength(0);
   });
+
+  it('loads category counts as a separate optional request', () => {
+    let actual: ReadonlyMap<string, number> | undefined;
+
+    service.getCategoryCounts().subscribe((value) => (actual = value));
+
+    const request = httpTesting.expectOne(
+      (candidate) => candidate.url === 'https://api.example.test/products',
+    );
+    expect(request.request.params.get('limit')).toBe('0');
+    expect(request.request.params.get('skip')).toBe('0');
+
+    request.flush({
+      products: [createProduct(1, 'smartphones'), createProduct(2, 'smartphones')],
+      total: 2,
+      skip: 0,
+      limit: 0,
+    });
+
+    expect(actual).toEqual(new Map([['smartphones', 2]]));
+  });
+
+  function createProduct(id: number, category: string): Product {
+    return {
+      id,
+      title: 'Example',
+      description: 'Example description',
+      category,
+      price: 10,
+      discountPercentage: 5,
+      rating: 4,
+      stock: 10,
+      tags: [],
+      thumbnail: 'https://example.test/thumbnail.png',
+      images: ['https://example.test/image.png'],
+    };
+  }
 });

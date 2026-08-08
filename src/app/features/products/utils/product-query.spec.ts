@@ -35,7 +35,22 @@ describe('product query utilities', () => {
       page: 1,
       search: 'iPhone 12',
       category: 'smartphones',
+      sortBy: 'rating',
+      order: 'desc',
     });
+  });
+
+  it('normalizes and serializes supported sorting values', () => {
+    expect(normalizeProductQuery({ sortBy: 'title', order: 'asc' })).toEqual({
+      page: 1,
+      search: '',
+      category: '',
+      sortBy: 'title',
+      order: 'asc',
+    });
+    expect(
+      toProductQueryParams(normalizeProductQuery({ sortBy: 'title', order: 'asc', page: 2 })),
+    ).toEqual({ page: '2', sortBy: 'title', order: 'asc' });
   });
 
   it('converts a one-based page into limit and skip', () => {
@@ -47,7 +62,13 @@ describe('product query utilities', () => {
 
   it('serializes only canonical URL query parameters', () => {
     expect(
-      toProductQueryParams({ page: 2, search: 'phone case', category: 'smartphones' }),
+      toProductQueryParams({
+        page: 2,
+        search: 'phone case',
+        category: 'smartphones',
+        sortBy: 'rating',
+        order: 'desc',
+      }),
     ).toEqual({
       page: '2',
       search: 'phone case',
@@ -57,7 +78,13 @@ describe('product query utilities', () => {
   });
 
   it('distinguishes canonical route input from values needing URL replacement', () => {
-    const query = { page: 2, search: 'phone', category: 'smartphones' };
+    const query = {
+      page: 2,
+      search: 'phone',
+      category: 'smartphones',
+      sortBy: 'rating' as const,
+      order: 'desc' as const,
+    };
 
     expect(isCanonicalProductQueryInput(query, query)).toBe(true);
     expect(

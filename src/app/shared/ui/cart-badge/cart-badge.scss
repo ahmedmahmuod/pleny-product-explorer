@@ -1,0 +1,38 @@
+:host {
+  display: inline-block;
+}
+
+.cart-badge {
+  position: relative;
+  display: inline-grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  color: var(--color-text-secondary);
+}
+
+.cart-badge img {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.cart-badge__count {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  z-index: 1;
+  display: grid;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border: var(--border-width-badge-hover) solid var(--color-surface);
+  border-radius: var(--radius-pill);
+  background: var(--color-badge-surface);
+  color: var(--color-badge-text);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  line-height: 1;
+  text-align: center;
+  place-items: center;
+}

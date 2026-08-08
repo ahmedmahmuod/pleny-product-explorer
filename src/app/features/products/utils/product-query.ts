@@ -2,6 +2,8 @@ import {
   PRODUCTS_PAGE_SIZE,
   ProductQuery,
   ProductQueryInput,
+  ProductSortBy,
+  ProductSortOrder,
 } from '../models/product-query.models';
 import { ProductPagination } from '../models/product.models';
 import { normalizeSearchTerm } from '../../../shared/utilities/normalize-search-term';
@@ -10,6 +12,8 @@ export const DEFAULT_PRODUCT_QUERY: ProductQuery = {
   page: 1,
   search: '',
   category: '',
+  sortBy: 'rating',
+  order: 'desc',
 };
 
 export function normalizeProductQuery(input: ProductQueryInput): ProductQuery {
@@ -17,6 +21,8 @@ export function normalizeProductQuery(input: ProductQueryInput): ProductQuery {
     page: normalizePage(input.page),
     search: normalizeSearchTerm(input.search),
     category: normalizeCategory(input.category),
+    sortBy: normalizeSortBy(input.sortBy),
+    order: normalizeSortOrder(input.order),
   };
 }
 
@@ -38,6 +44,14 @@ export function toProductQueryParams(query: ProductQuery): Readonly<Record<strin
     params['category'] = query.category;
   }
 
+  if (
+    query.sortBy !== DEFAULT_PRODUCT_QUERY.sortBy ||
+    query.order !== DEFAULT_PRODUCT_QUERY.order
+  ) {
+    params['sortBy'] = query.sortBy;
+    params['order'] = query.order;
+  }
+
   return params;
 }
 
@@ -56,7 +70,11 @@ export function isCanonicalProductQueryInput(
 
 export function productQueriesEqual(left: ProductQuery, right: ProductQuery): boolean {
   return (
-    left.page === right.page && left.search === right.search && left.category === right.category
+    left.page === right.page &&
+    left.search === right.search &&
+    left.category === right.category &&
+    left.sortBy === right.sortBy &&
+    left.order === right.order
   );
 }
 
@@ -73,6 +91,16 @@ function normalizePage(value: ProductQueryInput['page']): number {
 
 function normalizeCategory(value: ProductQueryInput['category']): string {
   return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function normalizeSortBy(value: ProductQueryInput['sortBy']): ProductSortBy {
+  return value === 'title' || value === 'price' || value === 'rating'
+    ? value
+    : DEFAULT_PRODUCT_QUERY.sortBy;
+}
+
+function normalizeSortOrder(value: ProductQueryInput['order']): ProductSortOrder {
+  return value === 'asc' || value === 'desc' ? value : DEFAULT_PRODUCT_QUERY.order;
 }
 
 function toOptionalString(value: number | string | null | undefined): string | undefined {
