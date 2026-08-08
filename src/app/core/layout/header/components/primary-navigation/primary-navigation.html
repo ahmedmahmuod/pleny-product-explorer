@@ -1,5 +1,10 @@
 @for (link of navigationLinks; track link.route) {
-  <a [class]="link.className" [routerLink]="link.route" routerLinkActive="nav-link--active" ariaCurrentWhenActive="page">
+  <a
+    [class]="link.className"
+    [routerLink]="link.route"
+    routerLinkActive="nav-link--active"
+    ariaCurrentWhenActive="page"
+  >
     {{ link.label }}
   </a>
 }

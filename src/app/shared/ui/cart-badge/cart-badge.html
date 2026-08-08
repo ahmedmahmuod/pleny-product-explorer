@@ -1,4 +1,9 @@
-<span class="cart-badge" role="img" [attr.aria-label]="accessibleLabel()" [attr.aria-busy]="loading() ? 'true' : null">
+<span
+  class="cart-badge"
+  role="img"
+  [attr.aria-label]="accessibleLabel()"
+  [attr.aria-busy]="loading() ? 'true' : null"
+>
   <img src="assets/images/Cart.svg" alt="" width="24" height="24" />
   <span class="cart-badge__count" aria-hidden="true">{{ safeCount() }}</span>
 </span>

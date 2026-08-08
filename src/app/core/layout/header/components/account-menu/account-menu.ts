@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthStore } from '../../../../auth/data-access/auth.store';
 import { ThemeService } from '../../../../theme/theme.service';

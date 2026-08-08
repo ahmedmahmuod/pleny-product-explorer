@@ -17,7 +17,13 @@
     } @else {
       @for (option of options(); track option.value) {
         <label class="category-filter__option">
-          <input type="radio" name="product-category" [value]="option.value" [checked]="value() === option.value" (change)="selectCategory(option.value)" />
+          <input
+            type="radio"
+            name="product-category"
+            [value]="option.value"
+            [checked]="value() === option.value"
+            (change)="selectCategory(option.value)"
+          />
           <span class="category-filter__control" aria-hidden="true"></span>
           <span class="category-filter__label">{{ option.label }}</span>
           @if (option.count !== undefined) {

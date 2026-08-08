@@ -15,16 +15,13 @@ export const routes: Routes = [
       },
       {
         path: 'home',
-        loadComponent: () =>
-          import('./features/home/home').then(({ HomePage }) => HomePage),
+        loadComponent: () => import('./features/home/home').then(({ HomePage }) => HomePage),
       },
       {
         path: 'products',
         canActivate: [authGuard],
         loadComponent: () =>
-          import('./features/products/products').then(
-            ({ ProductsPage }) => ProductsPage,
-          ),
+          import('./features/products/products').then(({ ProductsPage }) => ProductsPage),
       },
       { path: '', pathMatch: 'full', redirectTo: 'home' },
     ],

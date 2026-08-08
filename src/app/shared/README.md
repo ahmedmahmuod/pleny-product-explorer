@@ -5,7 +5,8 @@
 ## Contents
 
 - `ui/` — standalone, OnPush UI components documented in [`ui/README.md`](ui/README.md).
-- `utilities/` — small pure helpers such as search-term normalization.
+- `utilities/` — small pure helpers such as search-term normalization, safe
+  external-data narrowing, and shared HTTP error-message extraction.
 
 ## Reuse test
 

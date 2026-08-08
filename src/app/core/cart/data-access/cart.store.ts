@@ -1,10 +1,10 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, distinctUntilChanged, EMPTY, mergeMap, pipe, switchMap, tap } from 'rxjs';
 
 import { AuthStore } from '../../auth/data-access/auth.store';
+import { getHttpErrorMessage } from '../../../shared/utilities/http-error-message';
 import { CartApiService } from './cart-api.service';
 
 type CartStatus = 'idle' | 'loading' | 'loaded' | 'error';
@@ -64,7 +64,7 @@ export const CartStore = signalStore(
             catchError((error: unknown) => {
               patchState(store, {
                 status: 'error',
-                error: getCartErrorMessage(error, 'Unable to load your cart. Please try again.'),
+                error: getHttpErrorMessage(error, 'Unable to load your cart. Please try again.'),
               });
               return EMPTY;
             }),
@@ -108,7 +108,7 @@ export const CartStore = signalStore(
                 patchState(store, {
                   totalQuantity: Math.max(0, store.totalQuantity() - 1),
                   addingProductIds: removeProductId(store.addingProductIds(), productId),
-                  error: getCartErrorMessage(error, 'Unable to add the product to your cart.'),
+                  error: getHttpErrorMessage(error, 'Unable to add the product to your cart.'),
                 });
                 return EMPTY;
               }),
@@ -156,17 +156,4 @@ function addProductId(productIds: readonly number[], productId: number): readonl
 
 function removeProductId(productIds: readonly number[], productId: number): readonly number[] {
   return productIds.filter((currentId) => currentId !== productId);
-}
-
-function getCartErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof HttpErrorResponse && isRecord(error.error)) {
-    const message = error.error['message'];
-    if (typeof message === 'string' && message.trim()) return message;
-  }
-
-  return fallback;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
 }

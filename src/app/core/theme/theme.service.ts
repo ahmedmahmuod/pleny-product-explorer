@@ -59,7 +59,9 @@ export class ThemeService {
   private readPreference(): ThemePreference {
     try {
       const storedPreference = this.document.defaultView?.localStorage.getItem(THEME_STORAGE_KEY);
-      return storedPreference === 'light' || storedPreference === 'dark' ? storedPreference : 'system';
+      return storedPreference === 'light' || storedPreference === 'dark'
+        ? storedPreference
+        : 'system';
     } catch {
       return 'system';
     }
