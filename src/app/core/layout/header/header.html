@@ -1,53 +1,23 @@
 <header>
   <nav aria-label="Primary navigation">
     <div class="navigation-start">
-      <a class="brand" routerLink="/products" aria-label="ClickTik home">
+      <a class="brand" routerLink="/home" aria-label="ClickTik home">
         <img class="brand-logo" src="assets/images/logo.png" alt="" width="32" height="32" />
         <span>ClickTik</span>
       </a>
 
-      <a
-        class="nav-link home-link"
-        routerLink="/products"
-        routerLinkActive="nav-link--active"
-        ariaCurrentWhenActive="page"
-      >
-        Home
-      </a>
+      <app-primary-navigation />
     </div>
 
     @if (authStore.isAuthenticated()) {
       <div class="authenticated-actions">
-        <div class="search-region">
-          <label class="visually-hidden" for="header-product-search">Search products</label>
-          <input
-            #searchInput
-            id="header-product-search"
-            type="search"
-            name="search"
-            autocomplete="off"
-            placeholder="Search"
-            [value]="searchDraft()"
-            (input)="updateSearch(searchInput.value)"
-          />
-          <img class="search-icon" src="assets/images/Search.png" alt="" width="18" height="18" />
-        </div>
-
-        <span class="cart" role="img" aria-label="Cart">
-          <img src="assets/images/Cart.png" alt="" width="24" height="24" />
-        </span>
-
+        <app-product-search />
+        <app-cart-badge [count]="cartStore.totalQuantity()" [loading]="cartStore.isLoading()" />
         <app-account-menu />
       </div>
-
-      @if (searchNavigationError()) {
-        <p class="visually-hidden" role="alert" aria-live="assertive">
-          {{ searchNavigationError() }}
-        </p>
-      }
     } @else {
       <a
-        class="nav-link login-link"
+        class="nav-link"
         routerLink="/login"
         routerLinkActive="nav-link--active"
         ariaCurrentWhenActive="page"

@@ -1,0 +1,40 @@
+@if (hasPages()) {
+  <nav class="pagination" [attr.aria-label]="ariaLabel()">
+    <button
+      class="pagination__control"
+      type="button"
+      aria-label="Previous page"
+      [disabled]="!canGoPrevious()"
+      (click)="goToPage(currentPage() - 1)"
+    >
+      <span aria-hidden="true">&lsaquo;</span>
+    </button>
+
+    @for (item of items(); track item.key) {
+      @if (item.page === null) {
+        <span class="pagination__ellipsis" aria-hidden="true">{{ item.label }}</span>
+      } @else {
+        <button
+          class="pagination__page"
+          type="button"
+          [attr.aria-label]="'Page ' + item.page"
+          [attr.aria-current]="item.current ? 'page' : null"
+          [disabled]="item.current"
+          (click)="goToPage(item.page)"
+        >
+          {{ item.label }}
+        </button>
+      }
+    }
+
+    <button
+      class="pagination__control"
+      type="button"
+      aria-label="Next page"
+      [disabled]="!canGoNext()"
+      (click)="goToPage(currentPage() + 1)"
+    >
+      <span aria-hidden="true">&rsaquo;</span>
+    </button>
+  </nav>
+}

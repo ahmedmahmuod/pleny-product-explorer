@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { EMPTY, Observable, of, Subject, throwError } from 'rxjs';
 
-import { ProductQueryInput, PRODUCTS_PAGE_SIZE } from '../models/product-query.models';
+import { ProductSort, PRODUCTS_PAGE_SIZE } from '../models/product-query.models';
 import {
   Product,
   ProductCategory,
@@ -14,15 +14,24 @@ import { ProductsStore } from './products.store';
 
 class ProductsApiStub {
   readonly getProducts = vi.fn(
-    (_pagination: ProductPagination): Observable<ProductsResponse> => EMPTY,
+    (_pagination: ProductPagination, _sort?: ProductSort): Observable<ProductsResponse> => EMPTY,
   );
   readonly searchProducts = vi.fn(
-    (_search: string, _pagination: ProductPagination): Observable<ProductsResponse> => EMPTY,
+    (
+      _search: string,
+      _pagination: ProductPagination,
+      _sort?: ProductSort,
+    ): Observable<ProductsResponse> => EMPTY,
   );
   readonly getProductsByCategory = vi.fn(
-    (_category: string, _pagination: ProductPagination): Observable<ProductsResponse> => EMPTY,
+    (
+      _category: string,
+      _pagination: ProductPagination,
+      _sort?: ProductSort,
+    ): Observable<ProductsResponse> => EMPTY,
   );
   readonly getCategories = vi.fn((): Observable<readonly ProductCategory[]> => EMPTY);
+  readonly getCategoryCounts = vi.fn((): Observable<ReadonlyMap<string, number>> => EMPTY);
 }
 
 describe('ProductsStore', () => {
@@ -44,7 +53,13 @@ describe('ProductsStore', () => {
     expect(store.products()).toEqual([]);
     expect(store.total()).toBe(0);
     expect(store.totalPages()).toBe(0);
-    expect(store.query()).toEqual({ page: 1, search: '', category: '' });
+    expect(store.query()).toEqual({
+      page: 1,
+      search: '',
+      category: '',
+      sortBy: 'rating',
+      order: 'desc',
+    });
     expect(store.isLoading()).toBe(false);
     expect(store.error()).toBeNull();
   });
@@ -58,10 +73,13 @@ describe('ProductsStore', () => {
 
     expect(store.isLoading()).toBe(true);
     expect(store.products()).toEqual([]);
-    expect(productsApi.getProducts).toHaveBeenCalledWith({
-      limit: PRODUCTS_PAGE_SIZE,
-      skip: PRODUCTS_PAGE_SIZE,
-    });
+    expect(productsApi.getProducts).toHaveBeenCalledWith(
+      {
+        limit: PRODUCTS_PAGE_SIZE,
+        skip: PRODUCTS_PAGE_SIZE,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
 
     response.next(productsResponse([createProduct(10, 'Phone')], 20, 9));
     response.complete();
@@ -79,11 +97,21 @@ describe('ProductsStore', () => {
 
     store.loadProducts({ page: 'invalid', search: '  iPhone   12  ' });
 
-    expect(store.query()).toEqual({ page: 1, search: 'iPhone 12', category: '' });
-    expect(productsApi.searchProducts).toHaveBeenCalledWith('iPhone 12', {
-      limit: PRODUCTS_PAGE_SIZE,
-      skip: 0,
+    expect(store.query()).toEqual({
+      page: 1,
+      search: 'iPhone 12',
+      category: '',
+      sortBy: 'rating',
+      order: 'desc',
     });
+    expect(productsApi.searchProducts).toHaveBeenCalledWith(
+      'iPhone 12',
+      {
+        limit: PRODUCTS_PAGE_SIZE,
+        skip: 0,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
   });
 
   it('loads a category page when no search is active', () => {
@@ -92,10 +120,14 @@ describe('ProductsStore', () => {
 
     store.loadProducts({ page: 2, category: '  SmartPhones  ' });
 
-    expect(productsApi.getProductsByCategory).toHaveBeenCalledWith('smartphones', {
-      limit: PRODUCTS_PAGE_SIZE,
-      skip: PRODUCTS_PAGE_SIZE,
-    });
+    expect(productsApi.getProductsByCategory).toHaveBeenCalledWith(
+      'smartphones',
+      {
+        limit: PRODUCTS_PAGE_SIZE,
+        skip: PRODUCTS_PAGE_SIZE,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
   });
 
   it('filters and paginates a full category response when both filters are active', () => {
@@ -117,14 +149,44 @@ describe('ProductsStore', () => {
 
     store.loadProducts({ page: 2, search: ' phone ', category: 'smartphones' });
 
-    expect(productsApi.getProductsByCategory).toHaveBeenCalledWith('smartphones', {
-      limit: 0,
-      skip: 0,
-    });
+    expect(productsApi.getProductsByCategory).toHaveBeenCalledWith(
+      'smartphones',
+      {
+        limit: 0,
+        skip: 0,
+      },
+      { sortBy: 'rating', order: 'desc' },
+    );
     expect(productsApi.searchProducts).not.toHaveBeenCalled();
     expect(store.products()).toEqual(matchingProducts.slice(PRODUCTS_PAGE_SIZE));
     expect(store.total()).toBe(11);
     expect(store.totalPages()).toBe(2);
+  });
+
+  it('sorts locally after combined category filtering', () => {
+    const store = createStore();
+    productsApi.getProductsByCategory.mockReturnValue(
+      of(
+        productsResponse(
+          [
+            { ...createProduct(1, 'Phone low'), price: 10 },
+            { ...createProduct(2, 'Phone high'), price: 50 },
+          ],
+          2,
+          0,
+          0,
+        ),
+      ),
+    );
+
+    store.loadProducts({ category: 'smartphones', search: 'phone', sortBy: 'price', order: 'asc' });
+
+    expect(store.products().map(({ id }) => id)).toEqual([1, 2]);
+    expect(productsApi.getProductsByCategory).toHaveBeenCalledWith(
+      'smartphones',
+      { limit: 0, skip: 0 },
+      { sortBy: 'price', order: 'asc' },
+    );
   });
 
   it('cancels an older request when a newer query arrives', () => {
@@ -188,6 +250,29 @@ describe('ProductsStore', () => {
     expect(store.categoriesStatus()).toBe('loaded');
     expect(store.areCategoriesLoading()).toBe(false);
     expect(store.categoriesError()).toBeNull();
+  });
+
+  it('renders categories before optional count enrichment completes', () => {
+    const store = createStore();
+    const counts = new Subject<ReadonlyMap<string, number>>();
+    const categories: readonly ProductCategory[] = [
+      {
+        slug: 'smartphones',
+        name: 'Smartphones',
+        url: 'https://dummyjson.com/products/category/smartphones',
+      },
+    ];
+    productsApi.getCategories.mockReturnValue(of(categories));
+    productsApi.getCategoryCounts.mockReturnValue(counts);
+
+    store.loadCategories();
+
+    expect(store.categoriesStatus()).toBe('loaded');
+    expect(store.categories()).toEqual(categories);
+
+    counts.next(new Map([['smartphones', 2]]));
+
+    expect(store.categories()).toEqual([{ ...categories[0], count: 2 }]);
   });
 
   it('keeps category errors separate from loaded product results', () => {

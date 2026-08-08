@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject } from '@angular/core';
 import {
   patchState,
@@ -12,8 +11,9 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, EMPTY, exhaustMap, finalize, pipe, tap } from 'rxjs';
 
 import { AuthCredentials, AuthSession, AuthTokens } from '../models/auth.models';
-import { AuthApiService } from './auth-api.service';
 import { AuthSessionStorage } from '../contracts/auth-session-storage';
+import { AuthApiService } from './auth-api.service';
+import { getHttpErrorMessage } from '../../../shared/utilities/http-error-message';
 
 type AuthStatus = 'idle' | 'loading';
 
@@ -42,6 +42,7 @@ export const AuthStore = signalStore(
   withMethods((store) => {
     const authApi = inject(AuthApiService);
     const sessionStorage = inject(AuthSessionStorage);
+
     const login = rxMethod<AuthCredentials>(
       pipe(
         exhaustMap((credentials) => {
@@ -53,7 +54,9 @@ export const AuthStore = signalStore(
               patchState(store, { session, error: null });
             }),
             catchError((error: unknown) => {
-              patchState(store, { error: getLoginErrorMessage(error) });
+              patchState(store, {
+                error: getHttpErrorMessage(error, 'Unable to sign in. Please try again.'),
+              });
               return EMPTY;
             }),
             finalize(() => patchState(store, { status: 'idle' })),
@@ -80,10 +83,7 @@ export const AuthStore = signalStore(
 
       updateTokens(tokens: AuthTokens): void {
         const currentSession = store.session();
-
-        if (!currentSession) {
-          return;
-        }
+        if (!currentSession) return;
 
         const session: AuthSession = { ...currentSession, ...tokens };
         sessionStorage.write(session);
@@ -97,19 +97,3 @@ export const AuthStore = signalStore(
     },
   }),
 );
-
-function getLoginErrorMessage(error: unknown): string {
-  if (error instanceof HttpErrorResponse && isRecord(error.error)) {
-    const message = error.error['message'];
-
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
-  }
-
-  return 'Unable to sign in. Please try again.';
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}

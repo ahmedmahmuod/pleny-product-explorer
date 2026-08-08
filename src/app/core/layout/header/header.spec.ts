@@ -4,6 +4,7 @@ import { provideRouter, Router } from '@angular/router';
 
 import { AuthStore } from '../../auth/data-access/auth.store';
 import { AuthUser } from '../../auth/models/auth.models';
+import { CartStore } from '../../cart/data-access/cart.store';
 import { ThemeService } from '../../theme/theme.service';
 import { AppHeader } from './header';
 
@@ -24,23 +25,33 @@ class ThemeServiceStub {
   readonly setDarkMode = vi.fn((isDark: boolean): void => this.isDark.set(isDark));
 }
 
+class CartStoreStub {
+  readonly totalQuantity = signal(0);
+  readonly isLoading = signal(false);
+  readonly error = signal<string | null>(null);
+}
+
 describe('AppHeader', () => {
   let fixture: ComponentFixture<AppHeader>;
   let authStore: AuthStoreStub;
+  let cartStore: CartStoreStub;
   let theme: ThemeServiceStub;
 
   beforeEach(async () => {
     authStore = new AuthStoreStub();
+    cartStore = new CartStoreStub();
     theme = new ThemeServiceStub();
 
     TestBed.configureTestingModule({
       imports: [AppHeader],
       providers: [
         provideRouter([
+          { path: 'home', component: EmptyRoutePage },
           { path: 'products', component: EmptyRoutePage },
           { path: 'login', component: EmptyRoutePage },
         ]),
         { provide: AuthStore, useValue: authStore },
+        { provide: CartStore, useValue: cartStore },
         { provide: ThemeService, useValue: theme },
       ],
     });
@@ -52,14 +63,17 @@ describe('AppHeader', () => {
   it('shows login and hides authenticated actions for a signed-out user', () => {
     const element = fixture.nativeElement as HTMLElement;
 
+    expect(element.querySelector('.home-link')?.textContent).toContain('Home');
+    expect(element.querySelector('.products-link')?.textContent).toContain('Products');
     expect(element.querySelector('a[href="/login"]')?.textContent).toContain('Log in');
     expect(element.querySelector('input[type="search"]')).toBeNull();
-    expect(element.querySelector('.cart')).toBeNull();
+    expect(element.querySelector('app-cart-badge')).toBeNull();
     expect(element.querySelector('.account-menu')).toBeNull();
   });
 
   it('replaces login with search, cart, and an account menu for an authenticated user', () => {
     authStore.isAuthenticated.set(true);
+    cartStore.totalQuantity.set(3);
     authStore.user.set({
       id: 1,
       username: 'emilys',
@@ -76,15 +90,16 @@ describe('AppHeader', () => {
 
     expect(element.querySelector('a[href="/login"]')).toBeNull();
     expect(element.querySelector('input[type="search"]')).not.toBeNull();
-    expect(element.querySelector('.cart')?.getAttribute('aria-label')).toBe('Cart');
+    expect(element.querySelector('.cart-badge')?.getAttribute('aria-label')).toBe('Cart, 3 items');
+    expect(element.querySelector('.cart-badge__count')?.textContent).toContain('3');
     expect(element.querySelector<HTMLImageElement>('.search-icon')?.src).toContain(
-      '/assets/images/Search.png',
+      '/assets/images/Search.svg',
     );
-    expect(element.querySelector<HTMLImageElement>('.cart img')?.src).toContain(
-      '/assets/images/Cart.png',
+    expect(element.querySelector<HTMLImageElement>('.cart-badge img')?.src).toContain(
+      '/assets/images/Cart.svg',
     );
     expect(summary.textContent).toContain('Account');
-    expect(summary.getAttribute('aria-label')).toBe('Account for Emily Johnson');
+    expect(summary.getAttribute('aria-label')).toBe('Welcome Emily Johnson');
   });
 
   it('debounces normalized search into the product URL and preserves category', async () => {

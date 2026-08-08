@@ -11,6 +11,8 @@ import { Observable, of } from 'rxjs';
 
 import { API_BASE_URL } from '../../config/api.config';
 import { AuthRefreshCoordinator } from '../services/auth-refresh-coordinator.service';
+import { AuthSessionStorage } from '../contracts/auth-session-storage';
+import { AuthSession } from '../models/auth.models';
 import { AuthStore } from '../data-access/auth.store';
 import { authInterceptor } from './auth.interceptor';
 
@@ -26,6 +28,26 @@ class AuthRefreshCoordinatorStub {
   );
 }
 
+class AuthSessionStorageStub implements AuthSessionStorage {
+  session: AuthSession | null = {
+    user: {
+      id: 1,
+      username: 'emilys',
+      email: 'emily@example.test',
+      firstName: 'Emily',
+      lastName: 'Johnson',
+      gender: 'female',
+      image: 'https://example.test/emily.png',
+    },
+    accessToken: 'access-token',
+    refreshToken: 'refresh-token',
+  };
+
+  readonly read = vi.fn(() => this.session);
+  readonly write = vi.fn();
+  readonly clear = vi.fn();
+}
+
 describe('authInterceptor', () => {
   const apiBaseUrl = 'https://api.example.test';
 
@@ -33,10 +55,12 @@ describe('authInterceptor', () => {
   let httpTesting: HttpTestingController;
   let authStore: AuthStoreStub;
   let refreshCoordinator: AuthRefreshCoordinatorStub;
+  let sessionStorage: AuthSessionStorageStub;
 
   beforeEach(() => {
     authStore = new AuthStoreStub();
     refreshCoordinator = new AuthRefreshCoordinatorStub();
+    sessionStorage = new AuthSessionStorageStub();
 
     TestBed.configureTestingModule({
       providers: [
@@ -45,6 +69,7 @@ describe('authInterceptor', () => {
         { provide: API_BASE_URL, useValue: `${apiBaseUrl}/` },
         { provide: AuthStore, useValue: authStore },
         { provide: AuthRefreshCoordinator, useValue: refreshCoordinator },
+        { provide: AuthSessionStorage, useValue: sessionStorage },
       ],
     });
 
@@ -70,6 +95,20 @@ describe('authInterceptor', () => {
     expect(request.request.headers.has('Authorization')).toBe(false);
 
     request.flush({});
+  });
+
+  it('logs out and rejects a protected request when the persisted session is removed', () => {
+    let actualError: unknown;
+    sessionStorage.session = null;
+
+    http.get(`${apiBaseUrl}/products`).subscribe({
+      error: (error: unknown) => (actualError = error),
+    });
+
+    expect(actualError).toBeInstanceOf(HttpErrorResponse);
+    expect((actualError as HttpErrorResponse).status).toBe(401);
+    expect(authStore.logout).toHaveBeenCalledOnce();
+    expect(httpTesting.match(`${apiBaseUrl}/products`)).toHaveLength(0);
   });
 
   it.each(['/auth/login', '/auth/refresh'])(

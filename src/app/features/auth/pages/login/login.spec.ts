@@ -62,6 +62,8 @@ describe('LoginPage', () => {
   });
 
   it('shows required errors, blocks submission, and focuses the first invalid field', () => {
+    enterValue(usernameInput(), '');
+    enterValue(passwordInput(), '');
     formElement().dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     harness.detectChanges();
 

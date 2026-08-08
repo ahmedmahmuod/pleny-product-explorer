@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
@@ -8,6 +7,7 @@ import {
   PRODUCTS_PAGE_SIZE,
   ProductQuery,
   ProductQueryInput,
+  ProductSort,
 } from '../models/product-query.models';
 import { Product, ProductCategory, ProductsResponse } from '../models/product.models';
 import {
@@ -15,6 +15,7 @@ import {
   getProductPagination,
   normalizeProductQuery,
 } from '../utils/product-query';
+import { getHttpErrorMessage } from '../../../shared/utilities/http-error-message';
 import { ProductsApiService } from './products-api.service';
 
 type LoadStatus = 'idle' | 'loading' | 'loaded' | 'error';
@@ -75,7 +76,7 @@ export const ProductsStore = signalStore(
             catchError((error: unknown) => {
               patchState(store, {
                 status: 'error',
-                error: getErrorMessage(error, 'Unable to load products. Please try again.'),
+                error: getHttpErrorMessage(error, 'Unable to load products. Please try again.'),
               });
               return EMPTY;
             }),
@@ -97,17 +98,29 @@ export const ProductsStore = signalStore(
           });
 
           return productsApi.getCategories().pipe(
-            tap((categories) =>
+            tap((categories) => {
               patchState(store, {
                 categories,
                 categoriesStatus: 'loaded',
                 categoriesError: null,
-              }),
+              });
+            }),
+            switchMap((categories) =>
+              productsApi.getCategoryCounts().pipe(
+                tap((counts) =>
+                  patchState(store, {
+                    categories: applyCategoryCounts(categories, counts),
+                  }),
+                ),
+                // Counts are supplementary metadata; category filtering stays
+                // usable when the optional enrichment request is unavailable.
+                catchError(() => EMPTY),
+              ),
             ),
             catchError((error: unknown) => {
               patchState(store, {
                 categoriesStatus: 'error',
-                categoriesError: getErrorMessage(
+                categoriesError: getHttpErrorMessage(
                   error,
                   'Unable to load categories. Please try again.',
                 ),
@@ -135,35 +148,49 @@ function getProductsRequest(
   query: ProductQuery,
 ): Observable<ProductsResponse> {
   const pagination = getProductPagination(query.page);
+  const sort: ProductSort = { sortBy: query.sortBy, order: query.order };
 
   if (query.category && query.search) {
     return productsApi
-      .getProductsByCategory(query.category, { limit: 0, skip: 0 })
+      .getProductsByCategory(query.category, { limit: 0, skip: 0 }, sort)
       .pipe(map((response) => filterAndPaginate(response.products, query)));
   }
 
   if (query.category) {
-    return productsApi.getProductsByCategory(query.category, pagination);
+    return productsApi.getProductsByCategory(query.category, pagination, sort);
   }
 
   if (query.search) {
-    return productsApi.searchProducts(query.search, pagination);
+    return productsApi.searchProducts(query.search, pagination, sort);
   }
 
-  return productsApi.getProducts(pagination);
+  return productsApi.getProducts(pagination, sort);
 }
 
 function filterAndPaginate(products: readonly Product[], query: ProductQuery): ProductsResponse {
   const search = query.search.toLowerCase();
   const matches = products.filter((product) => productMatchesSearch(product, search));
+  const sortedMatches = [...matches].sort((left, right) => compareProducts(left, right, query));
   const { limit, skip } = getProductPagination(query.page);
 
   return {
-    products: matches.slice(skip, skip + limit),
-    total: matches.length,
+    products: sortedMatches.slice(skip, skip + limit),
+    total: sortedMatches.length,
     skip,
     limit,
   };
+}
+
+function compareProducts(left: Product, right: Product, query: ProductQuery): number {
+  const direction = query.order === 'asc' ? 1 : -1;
+
+  if (query.sortBy === 'title') {
+    return left.title.localeCompare(right.title) * direction;
+  }
+
+  const leftValue = left[query.sortBy];
+  const rightValue = right[query.sortBy];
+  return (leftValue - rightValue) * direction;
 }
 
 function productMatchesSearch(product: Product, search: string): boolean {
@@ -172,18 +199,12 @@ function productMatchesSearch(product: Product, search: string): boolean {
   );
 }
 
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof HttpErrorResponse && isRecord(error.error)) {
-    const message = error.error['message'];
-
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
-  }
-
-  return fallback;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
+function applyCategoryCounts(
+  categories: readonly ProductCategory[],
+  counts: ReadonlyMap<string, number>,
+): readonly ProductCategory[] {
+  return categories.map((category) => ({
+    ...category,
+    count: counts.get(category.slug.toLowerCase()) ?? 0,
+  }));
 }

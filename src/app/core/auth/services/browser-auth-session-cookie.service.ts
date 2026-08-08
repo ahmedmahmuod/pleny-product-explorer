@@ -1,0 +1,121 @@
+import { DOCUMENT } from '@angular/common';
+import { inject, Injectable } from '@angular/core';
+
+import { AuthSessionStorage } from '../contracts/auth-session-storage';
+import type { AuthSession, AuthUser } from '../models/auth.models';
+import { isRecord } from '../../../shared/utilities/is-record';
+
+export const AUTH_ACCESS_TOKEN_COOKIE = 'pleny.auth.access-token';
+export const AUTH_REFRESH_TOKEN_COOKIE = 'pleny.auth.refresh-token';
+export const AUTH_USER_COOKIE = 'pleny.auth.user';
+
+const AUTH_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
+
+@Injectable()
+export class BrowserAuthSessionCookieService extends AuthSessionStorage {
+  private readonly document = inject(DOCUMENT);
+
+  override read(): AuthSession | null {
+    try {
+      const accessToken = this.readCookie(AUTH_ACCESS_TOKEN_COOKIE);
+      const refreshToken = this.readCookie(AUTH_REFRESH_TOKEN_COOKIE);
+      const serializedUser = this.readCookie(AUTH_USER_COOKIE);
+
+      if (!accessToken || !refreshToken || !serializedUser) {
+        this.clear();
+        return null;
+      }
+
+      const user = this.parseUser(serializedUser);
+
+      if (!user) {
+        this.clear();
+        return null;
+      }
+
+      return { accessToken, refreshToken, user };
+    } catch {
+      this.clear();
+      return null;
+    }
+  }
+
+  override write(session: AuthSession): void {
+    try {
+      this.writeCookie(AUTH_ACCESS_TOKEN_COOKIE, session.accessToken);
+      this.writeCookie(AUTH_REFRESH_TOKEN_COOKIE, session.refreshToken);
+      this.writeCookie(AUTH_USER_COOKIE, JSON.stringify(session.user));
+    } catch {
+      // The in-memory session remains usable when cookies are unavailable.
+    }
+  }
+
+  override clear(): void {
+    try {
+      this.deleteCookie(AUTH_ACCESS_TOKEN_COOKIE);
+      this.deleteCookie(AUTH_REFRESH_TOKEN_COOKIE);
+      this.deleteCookie(AUTH_USER_COOKIE);
+    } catch {
+      // Logout must still clear in-memory state when cookie access is blocked.
+    }
+  }
+
+  private readCookie(name: string): string | null {
+    const cookie = this.document.cookie
+      .split(';')
+      .map((entry) => entry.trim())
+      .find((entry) => entry.startsWith(`${name}=`));
+
+    if (!cookie) {
+      return null;
+    }
+
+    return decodeURIComponent(cookie.slice(name.length + 1));
+  }
+
+  private writeCookie(name: string, value: string): void {
+    this.document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${AUTH_COOKIE_MAX_AGE_SECONDS}; Path=/; SameSite=Lax${this.isSecureContext() ? '; Secure' : ''}`;
+  }
+
+  private deleteCookie(name: string): void {
+    this.document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax${this.isSecureContext() ? '; Secure' : ''}`;
+  }
+
+  private isSecureContext(): boolean {
+    return this.document.defaultView?.location.protocol === 'https:';
+  }
+
+  /**
+   * Cookies are user-controlled input, so validate the decoded value before
+   * exposing it as the strongly typed session user used by the application.
+   */
+  private parseUser(serializedUser: string): AuthUser | null {
+    const value: unknown = JSON.parse(serializedUser);
+
+    if (!isRecord(value)) {
+      return null;
+    }
+
+    const id = value['id'];
+    const username = value['username'];
+    const email = value['email'];
+    const firstName = value['firstName'];
+    const lastName = value['lastName'];
+    const gender = value['gender'];
+    const image = value['image'];
+
+    if (
+      typeof id !== 'number' ||
+      typeof username !== 'string' ||
+      typeof email !== 'string' ||
+      typeof firstName !== 'string' ||
+      typeof lastName !== 'string' ||
+      typeof gender !== 'string' ||
+      typeof image !== 'string'
+    ) {
+      return null;
+    }
+
+    return { id, username, email, firstName, lastName, gender, image };
+  }
+}
