@@ -8,8 +8,8 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { AuthStore } from '../../../auth/data-access/auth.store';
-import { ThemeService } from '../../../theme/theme.service';
+import { AuthStore } from '../../../../auth/data-access/auth.store';
+import { ThemeService } from '../../../../theme/theme.service';
 
 @Component({
   selector: 'app-account-menu',

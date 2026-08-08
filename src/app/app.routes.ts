@@ -22,7 +22,7 @@ export const routes: Routes = [
         path: 'products',
         canActivate: [authGuard],
         loadComponent: () =>
-          import('./features/products/pages/products/products').then(
+          import('./features/products/products').then(
             ({ ProductsPage }) => ProductsPage,
           ),
       },

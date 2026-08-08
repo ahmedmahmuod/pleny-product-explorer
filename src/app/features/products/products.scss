@@ -31,6 +31,14 @@
   min-width: 0;
 }
 
+@media (min-width: 60.001rem) {
+  .products-page__sidebar {
+    position: sticky;
+    top: var(--space-4);
+    align-self: start;
+  }
+}
+
 .products-page__results {
   min-width: 0;
 }

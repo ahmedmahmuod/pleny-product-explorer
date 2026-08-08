@@ -1,0 +1,24 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-13);
+}
+
+.nav-link {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+  text-decoration: none;
+}
+
+.nav-link--active {
+  color: var(--color-text);
+}
+
+@media (max-width: 47.999rem) {
+  .home-link,
+  .products-link {
+    display: none;
+  }
+}

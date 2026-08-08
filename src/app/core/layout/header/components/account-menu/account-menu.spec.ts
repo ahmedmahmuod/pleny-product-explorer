@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 
-import { AuthStore } from '../../../auth/data-access/auth.store';
-import { AuthUser } from '../../../auth/models/auth.models';
-import { ThemeService } from '../../../theme/theme.service';
+import { AuthStore } from '../../../../auth/data-access/auth.store';
+import { AuthUser } from '../../../../auth/models/auth.models';
+import { ThemeService } from '../../../../theme/theme.service';
 import { AccountMenu } from './account-menu';
 
 @Component({

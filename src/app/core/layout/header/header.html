@@ -6,39 +6,15 @@
         <span>ClickTik</span>
       </a>
 
-      <a class="nav-link home-link" routerLink="/home" routerLinkActive="nav-link--active" ariaCurrentWhenActive="page">
-        Home
-      </a>
-
-      <a class="nav-link products-link" routerLink="/products" routerLinkActive="nav-link--active" ariaCurrentWhenActive="page">
-        Products
-      </a>
+      <app-primary-navigation />
     </div>
 
     @if (authStore.isAuthenticated()) {
       <div class="authenticated-actions">
-        <div class="search-region">
-          <label class="visually-hidden" for="header-product-search">Search products</label>
-          <input
-            #searchInput
-            id="header-product-search"
-            type="search"
-            name="search"
-            autocomplete="off"
-            placeholder="Search"
-            [value]="searchDraft()"
-            (input)="updateSearch(searchInput.value)"
-          />
-          <img class="search-icon" src="assets/images/Search.svg" alt="" width="18" height="18" />
-        </div>
-
+        <app-product-search />
         <app-cart-badge [count]="cartStore.totalQuantity()" [loading]="cartStore.isLoading()" />
         <app-account-menu />
       </div>
-
-      @if (searchNavigationError()) {
-        <p class="visually-hidden" role="alert" aria-live="assertive">{{ searchNavigationError() }}</p>
-      }
     } @else {
       <a class="nav-link" routerLink="/login" routerLinkActive="nav-link--active" ariaCurrentWhenActive="page">
         Log in

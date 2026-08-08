@@ -5,20 +5,20 @@ import { provideRouter, Router, withComponentInputBinding } from '@angular/route
 import { RouterTestingHarness } from '@angular/router/testing';
 import { Observable, of, Subject, throwError } from 'rxjs';
 
-import { routes } from '../../../../app.routes';
-import { CartStore } from '../../../../core/cart/data-access/cart.store';
-import { AuthStore } from '../../../../core/auth/data-access/auth.store';
-import { AuthUser } from '../../../../core/auth/models/auth.models';
-import { AppLayout } from '../../../../core/layout/app-layout/app-layout';
-import { ProductsApiService } from '../../data-access/products-api.service';
-import { ProductsStore } from '../../data-access/products.store';
-import { PRODUCTS_PAGE_SIZE } from '../../models/product-query.models';
+import { routes } from '../../app.routes';
+import { CartStore } from '../../core/cart/data-access/cart.store';
+import { AuthStore } from '../../core/auth/data-access/auth.store';
+import { AuthUser } from '../../core/auth/models/auth.models';
+import { AppLayout } from '../../core/layout/app-layout/app-layout';
+import { ProductsApiService } from './data-access/products-api.service';
+import { ProductsStore } from './data-access/products.store';
+import { PRODUCTS_PAGE_SIZE } from './models/product-query.models';
 import {
   Product,
   ProductCategory,
   ProductPagination,
   ProductsResponse,
-} from '../../models/product.models';
+} from './models/product.models';
 import { ProductsPage } from './products';
 
 @Component({

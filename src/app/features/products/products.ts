@@ -10,23 +10,23 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { ProductCard } from '../../../../shared/ui/product-card/product-card';
-import { Pagination } from '../../../../shared/ui/pagination/pagination';
-import { Breadcrumb, BreadcrumbItem } from '../../../../shared/ui/breadcrumb/breadcrumb';
-import { CartStore } from '../../../../core/cart/data-access/cart.store';
+import { ProductCard } from '../../shared/ui/product-card/product-card';
+import { Pagination } from '../../shared/ui/pagination/pagination';
+import { Breadcrumb, BreadcrumbItem } from '../../shared/ui/breadcrumb/breadcrumb';
+import { CartStore } from '../../core/cart/data-access/cart.store';
 import {
   CategoryFilter,
   CategoryFilterOption,
-} from '../../components/category-filter/category-filter';
-import { ProductsStore } from '../../data-access/products.store';
-import { ProductQuery, ProductQueryInput } from '../../models/product-query.models';
-import { ProductSortBy, ProductSortOrder } from '../../models/product-query.models';
+} from './components/category-filter/category-filter';
+import { ProductsStore } from './data-access/products.store';
+import { ProductQuery, ProductQueryInput } from './models/product-query.models';
+import { ProductSortBy, ProductSortOrder } from './models/product-query.models';
 import {
   isCanonicalProductQueryInput,
   normalizeProductQuery,
   productQueriesEqual,
   toProductQueryParams,
-} from '../../utils/product-query';
+} from './utils/product-query';
 
 @Component({
   selector: 'app-products-page',
@@ -89,7 +89,7 @@ export class ProductsPage {
   protected readonly breadcrumbItems = computed<readonly BreadcrumbItem[]>(() => {
     const query = this.routeQuery();
     const items: BreadcrumbItem[] = [
-      { id: 'home', label: 'Home', route: '/products', queryParams: { page: 1 } },
+      { id: 'home', label: 'Home', route: '/', queryParams: { page: 1 } },
       {
         id: 'products',
         label: 'Products',
