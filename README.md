@@ -6,9 +6,7 @@ The project is intentionally small and explainable: standalone OnPush components
 
 ## Live demo
 
-[Open the live application](https://your-live-app-url.example.com)
-
-> Deployment placeholder: replace `https://your-live-app-url.example.com` with the real application URL after deployment.
+## **Open live REAL DOMAIN (https://officialdev.com) if failure ? try open alternate link (https://pleny-product-explorer.vercel.app/home)**
 
 ## What is included
 
