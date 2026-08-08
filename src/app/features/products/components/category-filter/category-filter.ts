@@ -20,6 +20,8 @@ export interface CategoryFilterOption {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoryFilter {
+  protected readonly loadingPlaceholders = Array.from({ length: 16 }, (_, index) => index);
+
   readonly label = input('Products');
   readonly options = input.required<readonly CategoryFilterOption[]>();
   readonly value = input('');

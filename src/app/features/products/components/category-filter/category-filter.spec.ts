@@ -58,6 +58,8 @@ describe('CategoryFilter', () => {
     expect(fixture.nativeElement.querySelector('[role="status"]')?.textContent).toContain(
       'Loading product categories',
     );
+    expect(fixture.nativeElement.querySelectorAll('.category-filter__skeleton')).toHaveLength(16);
+    expect(fixture.nativeElement.querySelectorAll('input[type="radio"]')).toHaveLength(0);
     expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
       'Unable to load categories.',
     );
