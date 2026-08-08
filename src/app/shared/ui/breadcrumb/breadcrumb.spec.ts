@@ -29,7 +29,7 @@ describe('Breadcrumb', () => {
     expect(fixture.nativeElement.querySelector('[aria-current="page"]')?.textContent).toContain(
       'Products',
     );
-    expect(fixture.nativeElement.querySelector('.breadcrumb__separator')?.textContent).toBe('/');
+    expect(fixture.nativeElement.querySelector('span[aria-hidden="true"]')?.textContent).toBe('/');
   });
 
   it('uses the supplied accessible navigation label', () => {

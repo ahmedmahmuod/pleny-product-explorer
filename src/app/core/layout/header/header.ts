@@ -1,25 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  linkedSignal,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
-import {
-  catchError,
-  debounceTime,
-  defer,
-  distinctUntilChanged,
-  EMPTY,
-  filter,
-  from,
-  map,
-  switchMap,
-} from 'rxjs';
-
+import { catchError, debounceTime, defer, distinctUntilChanged, EMPTY, filter, from, map, switchMap } from 'rxjs';
 import { normalizeSearchTerm } from '../../../shared/utilities/normalize-search-term';
 import { CartBadge } from '../../../shared/ui/cart-badge/cart-badge';
 import { AuthStore } from '../../auth/data-access/auth.store';
@@ -38,18 +20,20 @@ const SEARCH_DEBOUNCE_MS = 300;
 export class AppHeader {
   protected readonly authStore = inject(AuthStore);
   protected readonly cartStore = inject(CartStore);
+  protected readonly searchNavigationError = signal<string | null>(null);
 
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+
   private readonly queryParamMap = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
   });
+
   private readonly routeSearch = computed(() =>
     normalizeSearchTerm(this.queryParamMap().get('search')),
   );
 
   protected readonly searchDraft = linkedSignal(() => this.routeSearch());
-  protected readonly searchNavigationError = signal<string | null>(null);
 
   // This subscription executes global product-search navigation and ends with the header.
   private readonly searchNavigation = toObservable(this.searchDraft)

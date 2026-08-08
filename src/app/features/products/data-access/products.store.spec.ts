@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { EMPTY, Observable, of, Subject, throwError } from 'rxjs';
 
-import { ProductQueryInput, ProductSort, PRODUCTS_PAGE_SIZE } from '../models/product-query.models';
+import { ProductSort, PRODUCTS_PAGE_SIZE } from '../models/product-query.models';
 import {
   Product,
   ProductCategory,

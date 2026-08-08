@@ -69,7 +69,6 @@ describe('CartStore', () => {
 
     expect(cartApi.getUserCarts).toHaveBeenCalledWith(7);
     expect(store.totalQuantity()).toBe(6);
-    expect(store.cartLabel()).toBe('Cart, 6 items');
     expect(store.status()).toBe('loaded');
     expect(store.isProductInCart(1)).toBe(true);
     expect(store.isProductInCart(99)).toBe(false);

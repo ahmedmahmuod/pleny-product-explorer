@@ -1,7 +1,7 @@
 <nav class="breadcrumb" [attr.aria-label]="ariaLabel()">
   @for (item of items(); track item.id; let isFirst = $first) {
     @if (!isFirst) {
-      <span class="breadcrumb__separator" aria-hidden="true">/</span>
+      <span aria-hidden="true">/</span>
     }
 
     @if (item.route && !item.current) {

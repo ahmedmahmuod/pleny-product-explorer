@@ -6,21 +6,11 @@
         <span>ClickTik</span>
       </a>
 
-      <a
-        class="nav-link home-link"
-        routerLink="/home"
-        routerLinkActive="nav-link--active"
-        ariaCurrentWhenActive="page"
-      >
+      <a class="nav-link home-link" routerLink="/home" routerLinkActive="nav-link--active" ariaCurrentWhenActive="page">
         Home
       </a>
 
-      <a
-        class="nav-link products-link"
-        routerLink="/products"
-        routerLinkActive="nav-link--active"
-        ariaCurrentWhenActive="page"
-      >
+      <a class="nav-link products-link" routerLink="/products" routerLinkActive="nav-link--active" ariaCurrentWhenActive="page">
         Products
       </a>
     </div>
@@ -43,22 +33,14 @@
         </div>
 
         <app-cart-badge [count]="cartStore.totalQuantity()" [loading]="cartStore.isLoading()" />
-
         <app-account-menu />
       </div>
 
       @if (searchNavigationError()) {
-        <p class="visually-hidden" role="alert" aria-live="assertive">
-          {{ searchNavigationError() }}
-        </p>
+        <p class="visually-hidden" role="alert" aria-live="assertive">{{ searchNavigationError() }}</p>
       }
     } @else {
-      <a
-        class="nav-link login-link"
-        routerLink="/login"
-        routerLinkActive="nav-link--active"
-        ariaCurrentWhenActive="page"
-      >
+      <a class="nav-link" routerLink="/login" routerLinkActive="nav-link--active" ariaCurrentWhenActive="page">
         Log in
       </a>
     }

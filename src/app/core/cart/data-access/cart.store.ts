@@ -28,12 +28,8 @@ const initialCartState: CartState = {
 export const CartStore = signalStore(
   { providedIn: 'root' },
   withState(initialCartState),
-  withComputed(({ status, totalQuantity }) => ({
+  withComputed(({ status }) => ({
     isLoading: computed(() => status() === 'loading'),
-    cartLabel: computed(() => {
-      const count = totalQuantity();
-      return `Cart, ${count} ${count === 1 ? 'item' : 'items'}`;
-    }),
   })),
   withMethods((store) => {
     const authStore = inject(AuthStore);
@@ -124,11 +120,9 @@ export const CartStore = signalStore(
     // The signal tracks login, logout, and refresh restoration without an
     // effect: rxMethod owns the HTTP lifecycle and cancels stale user loads.
     const userId = computed(() => authStore.user()?.id ?? null);
-    loadCart(authStore.user()?.id ?? null);
     loadCart(userId);
 
     return {
-      loadCart,
       addProduct,
 
       isProductAdding(productId: number): boolean {
@@ -139,9 +133,6 @@ export const CartStore = signalStore(
         return store.cartProductIds().includes(productId);
       },
 
-      retry(): void {
-        loadCart(authStore.user()?.id ?? null);
-      },
     };
   }),
 );
