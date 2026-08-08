@@ -1,7 +1,23 @@
-import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  linkedSignal,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, debounceTime, defer, distinctUntilChanged, EMPTY, filter, from, map, switchMap } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  EMPTY,
+  filter,
+  from,
+  map,
+  switchMap,
+} from 'rxjs';
 import { normalizeSearchTerm } from '../../../../../shared/utilities/normalize-search-term';
 import { AuthStore } from '../../../../auth/data-access/auth.store';
 
@@ -39,7 +55,11 @@ export class ProductSearch {
       filter((search) => search !== this.routeSearch()),
       switchMap((search) => {
         this.searchNavigationError.set(null);
-        return from(this.router.navigate(['/products'], { queryParams: { page: '1', search: search || null }, queryParamsHandling: 'merge' }),
+        return from(
+          this.router.navigate(['/products'], {
+            queryParams: { page: '1', search: search || null },
+            queryParamsHandling: 'merge',
+          }),
         ).pipe(
           catchError(() => {
             this.searchNavigationError.set('Unable to update product search. Please try again.');

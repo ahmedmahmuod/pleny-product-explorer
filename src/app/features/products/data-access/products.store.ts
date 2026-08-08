@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
@@ -16,6 +15,7 @@ import {
   getProductPagination,
   normalizeProductQuery,
 } from '../utils/product-query';
+import { getHttpErrorMessage } from '../../../shared/utilities/http-error-message';
 import { ProductsApiService } from './products-api.service';
 
 type LoadStatus = 'idle' | 'loading' | 'loaded' | 'error';
@@ -76,7 +76,7 @@ export const ProductsStore = signalStore(
             catchError((error: unknown) => {
               patchState(store, {
                 status: 'error',
-                error: getErrorMessage(error, 'Unable to load products. Please try again.'),
+                error: getHttpErrorMessage(error, 'Unable to load products. Please try again.'),
               });
               return EMPTY;
             }),
@@ -120,7 +120,7 @@ export const ProductsStore = signalStore(
             catchError((error: unknown) => {
               patchState(store, {
                 categoriesStatus: 'error',
-                categoriesError: getErrorMessage(
+                categoriesError: getHttpErrorMessage(
                   error,
                   'Unable to load categories. Please try again.',
                 ),
@@ -199,25 +199,12 @@ function productMatchesSearch(product: Product, search: string): boolean {
   );
 }
 
-function applyCategoryCounts(categories: readonly ProductCategory[], counts: ReadonlyMap<string, number>,): readonly ProductCategory[] {
+function applyCategoryCounts(
+  categories: readonly ProductCategory[],
+  counts: ReadonlyMap<string, number>,
+): readonly ProductCategory[] {
   return categories.map((category) => ({
     ...category,
     count: counts.get(category.slug.toLowerCase()) ?? 0,
   }));
-}
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof HttpErrorResponse && isRecord(error.error)) {
-    const message = error.error['message'];
-
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
-  }
-
-  return fallback;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
 }

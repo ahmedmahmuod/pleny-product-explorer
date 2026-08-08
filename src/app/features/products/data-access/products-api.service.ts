@@ -17,13 +17,21 @@ export class ProductsApiService {
     });
   }
 
-  searchProducts(search: string, pagination: ProductPagination, sort?: ProductSort): Observable<ProductsResponse> {
+  searchProducts(
+    search: string,
+    pagination: ProductPagination,
+    sort?: ProductSort,
+  ): Observable<ProductsResponse> {
     return this.http.get<ProductsResponse>(`${this.productsUrl}/search`, {
       params: this.getPaginationParams(pagination, sort).set('q', search),
     });
   }
 
-  getProductsByCategory(category: string, pagination: ProductPagination, sort?: ProductSort): Observable<ProductsResponse> {
+  getProductsByCategory(
+    category: string,
+    pagination: ProductPagination,
+    sort?: ProductSort,
+  ): Observable<ProductsResponse> {
     return this.http.get<ProductsResponse>(
       `${this.productsUrl}/category/${encodeURIComponent(category)}`,
       { params: this.getPaginationParams(pagination, sort) },

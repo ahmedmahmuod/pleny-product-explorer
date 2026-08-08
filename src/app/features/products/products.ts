@@ -1,14 +1,33 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, linkedSignal, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  linkedSignal,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProductCard } from '../../shared/ui/product-card/product-card';
-import { Pagination } from '../../shared/ui/pagination/pagination';
 import { Breadcrumb, BreadcrumbItem } from '../../shared/ui/breadcrumb/breadcrumb';
+import { Pagination } from '../../shared/ui/pagination/pagination';
+import { ProductCard } from '../../shared/ui/product-card/product-card';
 import { CartStore } from '../../core/cart/data-access/cart.store';
 import { CategoryFilter, CategoryFilterOption } from './components/category-filter/category-filter';
 import { ProductsStore } from './data-access/products.store';
-import { ProductQuery, ProductQueryInput } from './models/product-query.models';
-import { ProductSortBy, ProductSortOrder } from './models/product-query.models';
-import { isCanonicalProductQueryInput, normalizeProductQuery, productQueriesEqual, toProductQueryParams } from './utils/product-query';
+import {
+  ProductQuery,
+  ProductQueryInput,
+  ProductSort,
+  ProductSortBy,
+  ProductSortOrder,
+} from './models/product-query.models';
+import {
+  isCanonicalProductQueryInput,
+  normalizeProductQuery,
+  productQueriesEqual,
+  toProductQueryParams,
+} from './utils/product-query';
 
 @Component({
   selector: 'app-products-page',
@@ -18,16 +37,21 @@ import { isCanonicalProductQueryInput, normalizeProductQuery, productQueriesEqua
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductsPage {
+  // Router query parameters are the source of truth for the product view.
   readonly page = input<string | undefined>();
   readonly search = input<string | undefined>();
   readonly category = input<string | undefined>();
   readonly sortBy = input<string | undefined>();
   readonly order = input<string | undefined>();
 
+  // Global dependencies: the page coordinates stores and URL navigation.
   private readonly productsStore = inject(ProductsStore);
   protected readonly cartStore = inject(CartStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+
+  // Normalized route state keeps invalid or differently formatted URLs out of
+  // the store and gives the template one stable query model.
   private readonly routeQueryInput = computed<ProductQueryInput>(() => ({
     page: this.page(),
     search: this.search(),
@@ -42,34 +66,126 @@ export class ProductsPage {
     () => normalizeProductQuery({ category: this.category() }).category,
   );
   protected readonly queryNavigationError = signal<string | null>(null);
-  protected readonly categoryOptions = computed<readonly CategoryFilterOption[]>(() => [
-    { value: '', label: 'All' },
-    ...this.productsStore
-      .categories()
-      .map(({ slug, name, count }) => ({ value: slug, label: name, count })),
-  ]);
+
+  // Store-backed view state is exposed directly to the template as signals.
+  protected readonly categoryOptions = computed(() => this.createCategoryOptions());
   protected readonly products = this.productsStore.products;
   protected readonly total = this.productsStore.total;
   protected readonly totalPages = this.productsStore.totalPages;
   protected readonly isLoading = this.productsStore.isLoading;
   protected readonly status = this.productsStore.status;
   protected readonly productsError = this.productsStore.error;
-  protected readonly heading = computed(() => {
-    const query = this.routeQuery();
+  protected readonly heading = computed(() => this.createPageHeading(this.routeQuery()));
+  protected readonly breadcrumbItems = computed(() =>
+    this.createBreadcrumbItems(this.routeQuery()),
+  );
+  protected readonly resultSummary = computed(() =>
+    this.createResultSummary(this.total(), this.isLoading()),
+  );
 
+  protected readonly sortOptions: readonly { readonly value: string; readonly label: string }[] = [
+    { value: 'rating:desc', label: 'Popularity' },
+    { value: 'title:asc', label: 'Name: A-Z' },
+    { value: 'title:desc', label: 'Name: Z-A' },
+    { value: 'price:asc', label: 'Price: Low to high' },
+    { value: 'price:desc', label: 'Price: High to low' },
+  ];
+
+  protected readonly sortKey = computed(() => {
+    const query = this.routeQuery();
+    return `${query.sortBy}:${query.order}`;
+  });
+
+  protected readonly areCategoriesLoading = this.productsStore.areCategoriesLoading;
+  protected readonly categoriesError = this.productsStore.categoriesError;
+
+  // Calling rxMethod connects route signals to cancellable store workflows.
+  private readonly productsConnection = this.productsStore.loadProducts(this.routeQuery);
+  private readonly categoriesConnection = this.productsStore.loadCategories();
+
+  // This computed signal produces the URL that should be used after query
+  // normalization or after a requested page is proven to be out of range.
+  private readonly canonicalQuery = computed(() => this.createCanonicalQuery(this.routeQuery()), {
+    equal: productQueriesEqual,
+  });
+
+  // URL replacement is the only side effect here; derived values stay computed.
+  private readonly canonicalizeUrl = effect(() => {
+    const inputQuery = this.routeQueryInput();
+    const canonicalQuery = this.canonicalQuery();
+
+    if (isCanonicalProductQueryInput(inputQuery, canonicalQuery)) {
+      return;
+    }
+
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: toProductQueryParams(canonicalQuery),
+      replaceUrl: true,
+    });
+  });
+
+  protected changeCategory(category: string): void {
+    const normalizedCategory = normalizeProductQuery({ category }).category;
+    this.categoryDraft.set(normalizedCategory);
+
+    this.navigateToQuery(
+      { ...this.routeQuery(), page: 1, category: normalizedCategory },
+      'Unable to update product filters. Please try again.',
+      () => this.categoryDraft.set(this.routeQuery().category),
+    );
+  }
+
+  protected retryCategories(): void {
+    this.productsStore.loadCategories();
+  }
+
+  protected retryProducts(): void {
+    this.productsStore.retryProducts();
+  }
+
+  protected addToCart(productId: number): void {
+    this.cartStore.addProduct(productId);
+  }
+
+  protected changeSort(value: string): void {
+    const sort = parseProductSort(value);
+
+    if (!sort) {
+      return;
+    }
+
+    this.navigateToQuery(
+      { ...this.routeQuery(), page: 1, ...sort },
+      'Unable to update product sorting. Please try again.',
+    );
+  }
+
+  protected changePage(page: number): void {
+    this.navigateToQuery(
+      { ...this.routeQuery(), page },
+      'Unable to update product page. Please try again.',
+    );
+  }
+
+  private createCategoryOptions(): readonly CategoryFilterOption[] {
+    return [
+      { value: '', label: 'All' },
+      ...this.productsStore
+        .categories()
+        .map(({ slug, name, count }) => ({ value: slug, label: name, count })),
+    ];
+  }
+
+  private createPageHeading(query: ProductQuery): string {
     if (query.search) {
       return query.search;
     }
 
-    if (query.category) {
-      return this.categoryLabel(query.category);
-    }
+    return query.category ? this.categoryLabel(query.category) : 'Products';
+  }
 
-    return 'Products';
-  });
-
-  protected readonly breadcrumbItems = computed<readonly BreadcrumbItem[]>(() => {
-    const query = this.routeQuery();
+  private createBreadcrumbItems(query: ProductQuery): readonly BreadcrumbItem[] {
     const items: BreadcrumbItem[] = [
       { id: 'home', label: 'Home', route: '/', queryParams: { page: 1 } },
       {
@@ -96,145 +212,39 @@ export class ProductsPage {
     }
 
     return items;
-  });
+  }
 
-  protected readonly resultSummary = computed(() => {
-    const total = this.total();
+  private createResultSummary(total: number, isLoading: boolean): string {
+    return isLoading ? 'Loading products' : `(${total}) Products Found`;
+  }
 
-    if (this.status() === 'loading') {
-      return 'Loading products';
+  private createCanonicalQuery(routeQuery: ProductQuery): ProductQuery {
+    const query = this.isKnownCategory(routeQuery.category)
+      ? routeQuery
+      : { ...routeQuery, category: '' };
+
+    if (
+      this.productsStore.status() !== 'loaded' ||
+      !productQueriesEqual(this.productsStore.query(), query)
+    ) {
+      return query;
     }
 
-    return `(${total}) Products Found`;
-  });
+    const lastPage = Math.max(this.productsStore.totalPages(), 1);
+    return query.page > lastPage ? { ...query, page: lastPage } : query;
+  }
 
-  protected readonly sortOptions: readonly { readonly value: string; readonly label: string }[] = [
-    { value: 'rating:desc', label: 'Popularity' },
-    { value: 'title:asc', label: 'Name: A-Z' },
-    { value: 'title:desc', label: 'Name: Z-A' },
-    { value: 'price:asc', label: 'Price: Low to high' },
-    { value: 'price:desc', label: 'Price: High to low' },
-  ];
-
-  protected readonly sortKey = computed(() => {
-    const query = this.routeQuery();
-    return `${query.sortBy}:${query.order}`;
-  });
-
-  protected readonly areCategoriesLoading = this.productsStore.areCategoriesLoading;
-  protected readonly categoriesError = this.productsStore.categoriesError;
-
-  // rxMethod owns this signal subscription and tears it down with the route component.
-  private readonly productsConnection = this.productsStore.loadProducts(this.routeQuery);
-  private readonly categoriesConnection = this.productsStore.loadCategories();
-
-  private readonly canonicalQuery = computed(
-    (): ProductQuery => {
-      const routeQuery = this.routeQuery();
-      const query = this.isKnownCategory(routeQuery.category)
-        ? routeQuery
-        : { ...routeQuery, category: '' };
-
-      if (
-        this.productsStore.status() !== 'loaded' ||
-        !productQueriesEqual(this.productsStore.query(), query)
-      ) {
-        return query;
-      }
-
-      const lastPage = Math.max(this.productsStore.totalPages(), 1);
-      return query.page > lastPage ? { ...query, page: lastPage } : query;
-    },
-    { equal: productQueriesEqual },
-  );
-
-  // Replacing a non-canonical browser URL is an external navigation side effect.
-  private readonly canonicalizeUrl = effect(() => {
-    const inputQuery = this.routeQueryInput();
-    const canonicalQuery = this.canonicalQuery();
-
-    if (isCanonicalProductQueryInput(inputQuery, canonicalQuery)) {
-      return;
-    }
-
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: toProductQueryParams(canonicalQuery),
-      replaceUrl: true,
-    });
-  });
-
-  protected changeCategory(category: string): void {
-    const normalizedCategory = normalizeProductQuery({ category }).category;
-    this.categoryDraft.set(normalizedCategory);
+  private navigateToQuery(query: ProductQuery, errorMessage: string, onFailure?: () => void): void {
     this.queryNavigationError.set(null);
 
     void this.router
       .navigate([], {
         relativeTo: this.route,
-        queryParams: toProductQueryParams({
-          ...this.routeQuery(),
-          page: 1,
-          category: normalizedCategory,
-        }),
+        queryParams: toProductQueryParams(query),
       })
       .catch(() => {
-        this.categoryDraft.set(this.routeQuery().category);
-        this.queryNavigationError.set('Unable to update product filters. Please try again.');
-      });
-  }
-
-  protected retryCategories(): void {
-    this.productsStore.loadCategories();
-  }
-
-  protected retryProducts(): void {
-    this.productsStore.retryProducts();
-  }
-
-  protected addToCart(productId: number): void {
-    this.cartStore.addProduct(productId);
-  }
-
-  protected changeSort(value: string): void {
-    const [sortBy, order] = value.split(':');
-
-    if (!isProductSortBy(sortBy) || !isProductSortOrder(order)) {
-      return;
-    }
-
-    this.queryNavigationError.set(null);
-
-    void this.router
-      .navigate([], {
-        relativeTo: this.route,
-        queryParams: {
-          ...toProductQueryParams({
-            ...this.routeQuery(),
-            page: 1,
-            sortBy,
-            order,
-          }),
-        },
-      })
-      .catch(() => {
-        this.queryNavigationError.set('Unable to update product sorting. Please try again.');
-      });
-  }
-
-  protected changePage(page: number): void {
-    this.queryNavigationError.set(null);
-
-    void this.router
-      .navigate([], {
-        relativeTo: this.route,
-        queryParams: toProductQueryParams({
-          ...this.routeQuery(),
-          page,
-        }),
-      })
-      .catch(() => {
-        this.queryNavigationError.set('Unable to update product page. Please try again.');
+        onFailure?.();
+        this.queryNavigationError.set(errorMessage);
       });
   }
 
@@ -261,4 +271,10 @@ function isProductSortBy(value: string | undefined): value is ProductSortBy {
 
 function isProductSortOrder(value: string | undefined): value is ProductSortOrder {
   return value === 'asc' || value === 'desc';
+}
+
+function parseProductSort(value: string): ProductSort | null {
+  const [sortBy, order] = value.split(':');
+
+  return isProductSortBy(sortBy) && isProductSortOrder(order) ? { sortBy, order } : null;
 }
