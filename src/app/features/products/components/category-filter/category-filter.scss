@@ -1,0 +1,191 @@
+:host {
+  display: block;
+}
+
+.category-filter {
+  width: min(100%, var(--product-category-panel-width));
+  min-height: var(--product-category-panel-height);
+  margin: 0;
+  padding: var(--space-8);
+  border: var(--border-width-default) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.category-filter__legend {
+  padding: 0;
+  color: var(--color-text);
+  font-family: var(--font-family-category);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  line-height: normal;
+}
+
+.category-filter__options {
+  display: grid;
+  gap: var(--product-category-row-gap);
+  margin-block-start: var(--space-8);
+}
+
+.category-filter__option {
+  display: grid;
+  grid-template-columns: var(--product-category-radio-size) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  cursor: pointer;
+  font-family: var(--font-family-category);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  line-height: normal;
+}
+
+.category-filter__skeleton {
+  display: grid;
+  grid-template-columns: var(--product-category-radio-size) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.category-filter__skeleton-control,
+.category-filter__skeleton-label {
+  background: var(--color-surface-muted);
+  animation: category-filter-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+.category-filter__skeleton-control {
+  width: var(--product-category-radio-size);
+  height: var(--product-category-radio-size);
+  border-radius: var(--radius-pill);
+}
+
+.category-filter__skeleton-label {
+  width: 75%;
+  height: var(--line-height-tight);
+  border-radius: var(--radius-sm);
+}
+
+@keyframes category-filter-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-filter__skeleton-control,
+  .category-filter__skeleton-label {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+.category-filter__option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.category-filter__control {
+  display: inline-grid;
+  width: var(--product-category-radio-size);
+  height: var(--product-category-radio-size);
+  border: var(--border-width-default) solid var(--color-action);
+  border-radius: var(--radius-pill);
+  place-items: center;
+}
+
+.category-filter__control::after {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-action);
+  content: '';
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.category-filter__option input:checked + .category-filter__control::after {
+  opacity: 1;
+}
+
+.category-filter__option input:focus-visible + .category-filter__control {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.category-filter__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-filter__count {
+  margin-inline-start: var(--space-1);
+  color: var(--color-text-muted);
+}
+
+.category-filter:disabled {
+  color: var(--color-disabled-text);
+}
+
+.category-filter:disabled .category-filter__option {
+  cursor: wait;
+}
+
+.category-filter__empty,
+.category-filter__message {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-tight);
+}
+
+.category-filter__message {
+  margin-block-start: var(--space-8);
+  color: var(--color-danger);
+}
+
+.category-filter__message button {
+  margin-inline-start: var(--space-2);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: var(--font-weight-bold);
+  text-decoration: underline;
+}
+
+@media (max-width: 960px) {
+  .category-filter {
+    width: 100%;
+    min-height: auto;
+    padding: var(--space-6);
+  }
+
+  .category-filter__options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--space-8);
+    row-gap: var(--space-3);
+    margin-block-start: var(--space-6);
+  }
+
+  .category-filter__option {
+    font-size: var(--font-size-body-sm);
+  }
+
+  .category-filter__count {
+    margin-inline-start: 0;
+  }
+}

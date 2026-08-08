@@ -24,12 +24,10 @@
   --line-height-body: 24px;
   --line-height-login-title: 38px;
 
-  --space-0: 0px;
   --space-1: 4px;
   --space-2: 6px;
   --space-3: 8px;
   --space-4: 10px;
-  --space-5: 11px;
   --space-6: 12px;
   --space-7: 14px;
   --space-8: 16px;
@@ -42,24 +40,22 @@
   --space-15: 64px;
   --space-16: 80px;
   --space-17: 96px;
-  --space-18: 110px;
 
   --radius-sm: 4px;
   --radius-md: 8px;
-  --radius-lg: 12px;
   --radius-pill: 999px;
 
   --border-width-divider: 0.5px;
+  --border-width-thin: 0.7px;
   --border-width-default: 1px;
+  --border-width-badge: 2px;
+  --border-width-badge-hover: 3px;
 
   --shadow-xs: 0 1px 2px rgb(16 24 40 / 6%);
   --shadow-sm: 0 1px 3px rgb(16 24 40 / 10%);
   --shadow-input: 0 1px 2px rgb(16 24 40 / 5%);
-  --shadow-card: 0 0 11.279999732971191px rgb(0 0 0 / 25%);
-  --shadow-pagination: 0 7px 64px rgb(0 0 0 / 7%);
 
   --transition-fast: 120ms ease-out;
-  --transition-standard: 200ms ease-out;
 
   --focus-ring-width: 0.1875rem;
   --focus-ring-offset: 0.125rem;
@@ -67,12 +63,24 @@
   --control-height-sm: 36px;
   --control-height-md: 44px;
   --control-height-lg: 44px;
-  --layout-frame-width: 1440px;
-  --layout-frame-height-login: 1040px;
+  --product-card-width: 282px;
+  --product-card-height: 580px;
+  --product-card-media-height: 257px;
+  --product-card-action-width: 250px;
+  --product-card-action-height: 50px;
+  --product-rating-icon-size: 16.92px;
+  --product-category-panel-width: 282px;
+  --product-category-panel-height: 588px;
+  --product-category-radio-size: 14px;
+  --product-category-row-gap: 11px;
+  --product-feedback-min-height: 180px;
+  --pagination-item-size: 32px;
+  --pagination-item-size-compact: 28px;
   --layout-content-max: 1280px;
-  --layout-content-width: 1216px;
   --layout-header-height: 80px;
+  --layout-header-height-mobile: 72px;
   --layout-header-content-height: 44px;
+  --header-search-width-mobile: 150px;
   --layout-footer-height: 128px;
   --layout-form-max: 360px;
   --logo-size: 32px;
@@ -93,10 +101,8 @@
   --color-text-placeholder: #999999;
   --color-text-strong: #101828;
   --color-text-black: #000000;
-  --color-text-inverse: #ffffff;
   --color-border: #d0d5dd;
   --color-border-strong: #424242;
-  --color-border-muted: #979797;
   --color-border-subtle: #f2f4f7;
   --color-border-card-light: #f6f6f6;
   --color-border-divider: rgb(48 55 80 / 8%);
@@ -104,6 +110,8 @@
   --color-action-hover: #35b8bb;
   --color-action-active: #2ca5a8;
   --color-on-action: #344054;
+  --color-badge-surface: #41cccc;
+  --color-badge-text: #344054;
   --color-rating: #f4b000;
   --color-footer: #1d2939;
   --color-footer-text: #ffffff;
@@ -111,14 +119,8 @@
   --color-disabled-surface: #eaecf0;
   --color-disabled-text: #98a2b3;
 
-  // The references do not expose feedback states; accessible semantic defaults
-  // prevent feature components from inventing one-off state colors later.
   --color-danger: #b42318;
   --color-danger-surface: #fef3f2;
-  --color-success: #027a48;
-  --color-success-surface: #ecfdf3;
-  --color-warning: #b54708;
-  --color-warning-surface: #fffaeb;
 }
 
 [data-theme='dark'] {
@@ -138,8 +140,6 @@
   --color-text-placeholder: #98a8ba;
   --color-text-strong: #f9fafb;
   --color-text-black: #f9fafb;
-  --color-text-inverse: #101c2a;
-  --color-border-muted: #728197;
   --color-border-subtle: #24364a;
   --color-border-card-light: #34465a;
   --color-border-divider: rgb(208 213 221 / 20%);
@@ -147,6 +147,8 @@
   --color-action-hover: #67d7d9;
   --color-action-active: #35b8bb;
   --color-on-action: #102a30;
+  --color-badge-surface: #41cccc;
+  --color-badge-text: #344054;
   --color-rating: #fdbf24;
   --color-footer: #0b1520;
   --color-footer-text: #e4e7ec;
@@ -155,8 +157,4 @@
   --color-disabled-text: #98a8ba;
   --color-danger: #fda29b;
   --color-danger-surface: #55160c;
-  --color-success: #6ce9a6;
-  --color-success-surface: #054f31;
-  --color-warning: #fec84b;
-  --color-warning-surface: #5f3b08;
 }

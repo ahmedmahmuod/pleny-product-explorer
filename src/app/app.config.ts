@@ -9,7 +9,7 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/auth/interceptors/auth.interceptor';
 import { AuthSessionStorage } from './core/auth/contracts/auth-session-storage';
-import { BrowserAuthSessionStorage } from './core/auth/services/browser-auth-session-storage.service';
+import { BrowserAuthSessionCookieService } from './core/auth/services/browser-auth-session-cookie.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,7 +17,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     provideRouter(routes, withComponentInputBinding()),
-    BrowserAuthSessionStorage,
-    { provide: AuthSessionStorage, useExisting: BrowserAuthSessionStorage },
+    BrowserAuthSessionCookieService,
+    { provide: AuthSessionStorage, useExisting: BrowserAuthSessionCookieService },
   ],
 };

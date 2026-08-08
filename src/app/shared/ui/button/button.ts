@@ -23,6 +23,8 @@ export class Button {
   readonly disabled = input(false, { transform: booleanAttribute });
   readonly loading = input(false, { transform: booleanAttribute });
   readonly loadingLabel = input('Loading, please wait');
+  readonly title = input<string | null>(null);
+  readonly ariaDescribedBy = input<string | null>(null);
 
   protected readonly interactionDisabled = computed(() => this.disabled() || this.loading());
 }

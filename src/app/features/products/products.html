@@ -1,0 +1,89 @@
+<section class="products-page" aria-labelledby="products-title">
+  <div class="products-page__header">
+    <h1 id="products-title">{{ heading() }}</h1>
+
+    <app-breadcrumb [items]="breadcrumbItems()" />
+  </div>
+
+  <div class="products-page__content">
+    <aside class="products-page__sidebar" aria-label="Product filters">
+      <app-category-filter
+        [options]="categoryOptions()"
+        [value]="categoryDraft()"
+        [loading]="areCategoriesLoading()"
+        [error]="categoriesError()"
+        (valueChange)="changeCategory($event)"
+        (retry)="retryCategories()"
+      />
+    </aside>
+
+    <div class="products-page__results">
+      <div class="products-page__toolbar">
+        <p class="products-page__summary" aria-live="polite">{{ resultSummary() }}</p>
+
+        <label class="products-page__sort">
+          <span>Sort By:</span>
+          <select
+            #sortSelect
+            aria-label="Sort products"
+            [value]="sortKey()"
+            (change)="changeSort(sortSelect.value)"
+          >
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      @if (queryNavigationError()) {
+        <p class="products-page__message" role="alert" aria-live="assertive">
+          {{ queryNavigationError() }}
+        </p>
+      }
+
+      @if (cartStore.error()) {
+        <p class="products-page__message" role="alert" aria-live="assertive">
+          {{ cartStore.error() }}
+        </p>
+      }
+
+      @if (status() === 'error') {
+        <div class="products-page__feedback" role="alert">
+          <p>{{ productsError() }}</p>
+          <button type="button" (click)="retryProducts()">Retry products</button>
+        </div>
+      } @else if (isLoading()) {
+        <div class="products-page__grid" aria-hidden="true">
+          @for (placeholder of [1, 2, 3, 4, 5, 6]; track placeholder) {
+            <div class="products-page__card-placeholder"></div>
+          }
+        </div>
+      } @else {
+        <div class="products-page__grid">
+          @for (product of products(); track product.id; let isFirst = $first) {
+            <app-product-card
+              [product]="product"
+              [priority]="isFirst"
+              [adding]="cartStore.isProductAdding(product.id)"
+              [addDisabled]="cartStore.isLoading()"
+              [inCart]="cartStore.isProductInCart(product.id)"
+              (addToCart)="addToCart($event)"
+            />
+          } @empty {
+            <div class="products-page__feedback products-page__empty">
+              <p>No products match the current filters.</p>
+            </div>
+          }
+        </div>
+
+        <app-pagination
+          class="products-page__pagination"
+          [currentPage]="routeQuery().page"
+          [totalPages]="totalPages()"
+          (pageChange)="changePage($event)"
+        />
+      }
+    </div>
+  </div>
+</section>

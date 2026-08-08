@@ -1,0 +1,78 @@
+<article class="product-card" [attr.aria-labelledby]="titleId()">
+  <div class="product-card__media">
+    <img
+      class="product-card__image"
+      [src]="product().thumbnail"
+      [alt]="product().title + ' product image'"
+      width="282"
+      height="257"
+      [attr.loading]="priority() ? 'eager' : 'lazy'"
+      [attr.fetchpriority]="priority() ? 'high' : 'auto'"
+      decoding="async"
+    />
+
+    @if (product().discountPercentage > 0) {
+      <span class="product-card__discount">
+        - {{ product().discountPercentage | number: '1.0-2' }}%
+      </span>
+    }
+  </div>
+
+  <div class="product-card__body">
+    <h2 class="product-card__title" [id]="titleId()">{{ product().title }}</h2>
+    <p class="product-card__description">{{ product().description }}</p>
+
+    <p class="product-card__pricing">
+      <span class="visually-hidden">{{ priceLabel() }}</span>
+      @if (product().discountPercentage > 0) {
+        <span class="product-card__original-price" aria-hidden="true">
+          ${{ product().price | number: '1.0-2' }} USD
+        </span>
+      }
+      <strong aria-hidden="true"> ${{ discountedPrice() | number: '1.0-2' }} USD </strong>
+    </p>
+
+    <dl class="product-card__details">
+      <div>
+        <dt>Brand:</dt>
+        <dd>{{ product().brand || 'Not specified' }}</dd>
+      </div>
+      <div>
+        <dt>Category:</dt>
+        <dd class="product-card__category">{{ product().category }}</dd>
+      </div>
+      <div>
+        <dt>In stock:</dt>
+        <dd>{{ product().stock }}</dd>
+      </div>
+    </dl>
+
+    <p class="product-card__rating">
+      <span class="visually-hidden">{{ ratingLabel() }}</span>
+      <span class="product-card__star" aria-hidden="true">★</span>
+      <strong aria-hidden="true">{{ product().rating | number: '1.0-2' }}</strong>
+      @if (reviewCount() !== null) {
+        <span class="product-card__review-count" aria-hidden="true">({{ reviewCount() }})</span>
+      }
+    </p>
+
+    <app-button
+      class="product-card__action"
+      type="button"
+      size="large"
+      [disabled]="actionDisabled()"
+      [title]="actionTooltip()"
+      [ariaDescribedBy]="inCart() ? actionDescriptionId() : null"
+      [loading]="adding()"
+      [loadingLabel]="'Adding ' + product().title + ' to cart'"
+      (click)="requestAdd()"
+    >
+      {{ product().stock <= 0 ? 'Out of stock' : inCart() ? 'Added to cart' : 'Add to cart' }}
+    </app-button>
+    @if (inCart()) {
+      <span class="visually-hidden" [id]="actionDescriptionId()">
+        This product is already in your cart.
+      </span>
+    }
+  </div>
+</article>

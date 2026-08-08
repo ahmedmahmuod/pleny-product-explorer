@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-10);
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
+  line-height: normal;
+}
+
+.breadcrumb a,
+.breadcrumb span {
+  color: inherit;
+}
+
+.breadcrumb a {
+  text-decoration: none;
+}
+
+.breadcrumb [aria-current='page'] {
+  font-weight: var(--font-weight-bold);
+}
+
+@media (max-width: 47.999rem) {
+  .breadcrumb {
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
+  }
+}
