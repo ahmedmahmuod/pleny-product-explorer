@@ -37,24 +37,17 @@ export class ProductSearch {
       distinctUntilChanged(),
       filter(() => this.authStore.isAuthenticated()),
       filter((search) => search !== this.routeSearch()),
-      switchMap((search) =>
-        defer(() => {
-          this.searchNavigationError.set(null);
-
-          return from(
-            this.router.navigate(['/products'], {
-              queryParams: { page: '1', search: search || null },
-              queryParamsHandling: 'merge',
-            }),
-          );
-        }).pipe(
-          // Recovery stays inside switchMap so a rejected navigation does not disable search.
+      switchMap((search) => {
+        this.searchNavigationError.set(null);
+        return from(this.router.navigate(['/products'], { queryParams: { page: '1', search: search || null }, queryParamsHandling: 'merge' }),
+        ).pipe(
           catchError(() => {
             this.searchNavigationError.set('Unable to update product search. Please try again.');
+
             return EMPTY;
           }),
-        ),
-      ),
+        );
+      }),
       takeUntilDestroyed(),
     )
     .subscribe();
