@@ -93,10 +93,10 @@ describe('AppHeader', () => {
     expect(element.querySelector('.cart-badge')?.getAttribute('aria-label')).toBe('Cart, 3 items');
     expect(element.querySelector('.cart-badge__count')?.textContent).toContain('3');
     expect(element.querySelector<HTMLImageElement>('.search-icon')?.src).toContain(
-      '/assets/images/Search.png',
+      '/assets/images/Search.svg',
     );
     expect(element.querySelector<HTMLImageElement>('.cart-badge img')?.src).toContain(
-      '/assets/images/Cart.png',
+      '/assets/images/Cart.svg',
     );
     expect(summary.textContent).toContain('Account');
     expect(summary.getAttribute('aria-label')).toBe('Account for Emily Johnson');
