@@ -28,15 +28,7 @@ export class ThemeService {
   });
 
   constructor() {
-    const mediaQuery = this.mediaQuery;
-    if (!mediaQuery) return;
-
-    const updateSystemTheme = ({ matches }: MediaQueryListEvent): void => {
-      this.systemTheme.set(matches ? 'dark' : 'light');
-    };
-
-    mediaQuery.addEventListener('change', updateSystemTheme);
-    this.destroyRef.onDestroy(() => mediaQuery.removeEventListener('change', updateSystemTheme));
+    this.listenToSystemThemeChanges();
   }
 
   setDarkMode(isDark: boolean): void {
@@ -48,6 +40,20 @@ export class ThemeService {
     return typeof browserWindow?.matchMedia === 'function'
       ? browserWindow.matchMedia('(prefers-color-scheme: dark)')
       : undefined;
+  }
+
+  private listenToSystemThemeChanges(): void {
+    const mediaQuery = this.mediaQuery;
+    if (!mediaQuery) {
+      return;
+    }
+
+    const updateSystemTheme = ({ matches }: MediaQueryListEvent): void => {
+      this.systemTheme.set(matches ? 'dark' : 'light');
+    };
+
+    mediaQuery.addEventListener('change', updateSystemTheme);
+    this.destroyRef.onDestroy(() => mediaQuery.removeEventListener('change', updateSystemTheme));
   }
 
   private readPreference(): ThemePreference {

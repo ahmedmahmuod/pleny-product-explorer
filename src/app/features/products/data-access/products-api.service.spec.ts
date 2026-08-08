@@ -92,7 +92,7 @@ describe('ProductsApiService', () => {
     request.flush({ ...response, skip: 9 });
   });
 
-  it('enriches typed category metadata with product counts', () => {
+  it('loads category metadata without waiting for product counts', () => {
     const categories: readonly ProductCategory[] = [
       {
         slug: 'smartphones',
@@ -109,39 +109,31 @@ describe('ProductsApiService', () => {
 
     request.flush(categories);
 
-    const countRequest = httpTesting.expectOne(
+    expect(actual).toEqual(categories);
+    expect(
+      httpTesting.match((candidate) => candidate.url === 'https://api.example.test/products'),
+    ).toHaveLength(0);
+  });
+
+  it('loads category counts as a separate optional request', () => {
+    let actual: ReadonlyMap<string, number> | undefined;
+
+    service.getCategoryCounts().subscribe((value) => (actual = value));
+
+    const request = httpTesting.expectOne(
       (candidate) => candidate.url === 'https://api.example.test/products',
     );
-    expect(countRequest.request.params.get('limit')).toBe('0');
-    expect(countRequest.request.params.get('skip')).toBe('0');
+    expect(request.request.params.get('limit')).toBe('0');
+    expect(request.request.params.get('skip')).toBe('0');
 
-    countRequest.flush({
+    request.flush({
       products: [createProduct(1, 'smartphones'), createProduct(2, 'smartphones')],
       total: 2,
       skip: 0,
       limit: 0,
     });
 
-    expect(actual).toEqual([{ ...categories[0], count: 2 }]);
-  });
-
-  it('keeps category metadata when count enrichment fails', () => {
-    const categories: readonly ProductCategory[] = [
-      {
-        slug: 'smartphones',
-        name: 'Smartphones',
-        url: 'https://api.example.test/products/category/smartphones',
-      },
-    ];
-    let actual: readonly ProductCategory[] | undefined;
-
-    service.getCategories().subscribe((value) => (actual = value));
-    httpTesting.expectOne('https://api.example.test/products/categories').flush(categories);
-    httpTesting
-      .expectOne((candidate) => candidate.url === 'https://api.example.test/products')
-      .flush('offline', { status: 503, statusText: 'Unavailable' });
-
-    expect(actual).toEqual(categories);
+    expect(actual).toEqual(new Map([['smartphones', 2]]));
   });
 
   function createProduct(id: number, category: string): Product {

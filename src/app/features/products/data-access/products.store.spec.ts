@@ -31,6 +31,7 @@ class ProductsApiStub {
     ): Observable<ProductsResponse> => EMPTY,
   );
   readonly getCategories = vi.fn((): Observable<readonly ProductCategory[]> => EMPTY);
+  readonly getCategoryCounts = vi.fn((): Observable<ReadonlyMap<string, number>> => EMPTY);
 }
 
 describe('ProductsStore', () => {
@@ -249,6 +250,29 @@ describe('ProductsStore', () => {
     expect(store.categoriesStatus()).toBe('loaded');
     expect(store.areCategoriesLoading()).toBe(false);
     expect(store.categoriesError()).toBeNull();
+  });
+
+  it('renders categories before optional count enrichment completes', () => {
+    const store = createStore();
+    const counts = new Subject<ReadonlyMap<string, number>>();
+    const categories: readonly ProductCategory[] = [
+      {
+        slug: 'smartphones',
+        name: 'Smartphones',
+        url: 'https://dummyjson.com/products/category/smartphones',
+      },
+    ];
+    productsApi.getCategories.mockReturnValue(of(categories));
+    productsApi.getCategoryCounts.mockReturnValue(counts);
+
+    store.loadCategories();
+
+    expect(store.categoriesStatus()).toBe('loaded');
+    expect(store.categories()).toEqual(categories);
+
+    counts.next(new Map([['smartphones', 2]]));
+
+    expect(store.categories()).toEqual([{ ...categories[0], count: 2 }]);
   });
 
   it('keeps category errors separate from loaded product results', () => {

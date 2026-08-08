@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { Observable, of, Subject, throwError } from 'rxjs';
+import { EMPTY, Observable, of, Subject, throwError } from 'rxjs';
 
 import { routes } from '../../app.routes';
 import { CartStore } from '../../core/cart/data-access/cart.store';
@@ -81,6 +81,7 @@ class ProductsApiStub {
       of(productsResponse(this.categoryProducts, this.categoryProducts.length, pagination)),
   );
   readonly getCategories = vi.fn((): Observable<readonly ProductCategory[]> => of(this.categories));
+  readonly getCategoryCounts = vi.fn((): Observable<ReadonlyMap<string, number>> => EMPTY);
 }
 
 describe('ProductsPage URL state', () => {
@@ -309,6 +310,11 @@ describe('ProductsPage URL state', () => {
     await navigate('/products?page=2&category=smartphones');
 
     expect(routeElement().querySelectorAll('app-product-card')).toHaveLength(20);
+    const images = Array.from(routeElement().querySelectorAll('app-product-card img'));
+    expect(images[0]?.getAttribute('loading')).toBe('eager');
+    expect(images[0]?.getAttribute('fetchpriority')).toBe('high');
+    expect(images[1]?.getAttribute('loading')).toBe('lazy');
+    expect(images[1]?.getAttribute('fetchpriority')).toBe('auto');
 
     pageButton('1').click();
     await harness.fixture.whenStable();

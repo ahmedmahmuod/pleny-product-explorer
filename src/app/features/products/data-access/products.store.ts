@@ -98,12 +98,24 @@ export const ProductsStore = signalStore(
           });
 
           return productsApi.getCategories().pipe(
-            tap((categories) =>
+            tap((categories) => {
               patchState(store, {
                 categories,
                 categoriesStatus: 'loaded',
                 categoriesError: null,
-              }),
+              });
+            }),
+            switchMap((categories) =>
+              productsApi.getCategoryCounts().pipe(
+                tap((counts) =>
+                  patchState(store, {
+                    categories: applyCategoryCounts(categories, counts),
+                  }),
+                ),
+                // Counts are supplementary metadata; category filtering stays
+                // usable when the optional enrichment request is unavailable.
+                catchError(() => EMPTY),
+              ),
             ),
             catchError((error: unknown) => {
               patchState(store, {
@@ -185,6 +197,13 @@ function productMatchesSearch(product: Product, search: string): boolean {
   return [product.title, product.description, product.brand ?? '', ...product.tags].some((value) =>
     value.toLowerCase().includes(search),
   );
+}
+
+function applyCategoryCounts(categories: readonly ProductCategory[], counts: ReadonlyMap<string, number>,): readonly ProductCategory[] {
+  return categories.map((category) => ({
+    ...category,
+    count: counts.get(category.slug.toLowerCase()) ?? 0,
+  }));
 }
 
 function getErrorMessage(error: unknown, fallback: string): string {

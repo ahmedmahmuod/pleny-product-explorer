@@ -26,7 +26,7 @@ Example:
 4. When search and category are combined, the store loads the category collection, filters searchable fields locally, sorts, and paginates.
 5. The page maps store signals into shared presentational component inputs.
 
-DummyJSON category metadata does not include counts. The API adapter performs one bounded complete-catalog request to enrich category counts; if that optional request fails, filtering still works.
+DummyJSON category metadata does not include counts. The API adapter loads category metadata first, then performs one bounded complete-catalog request to enrich counts independently. This optional request does not block the first product request or category filter rendering; if it fails, filtering still works without counts.
 
 ## Adding product behavior
 

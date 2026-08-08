@@ -6,7 +6,8 @@
       [alt]="product().title + ' product image'"
       width="282"
       height="257"
-      loading="lazy"
+      [attr.loading]="priority() ? 'eager' : 'lazy'"
+      [attr.fetchpriority]="priority() ? 'high' : 'auto'"
       decoding="async"
     />
 
@@ -21,7 +22,8 @@
     <h2 class="product-card__title" [id]="titleId()">{{ product().title }}</h2>
     <p class="product-card__description">{{ product().description }}</p>
 
-    <p class="product-card__pricing" [attr.aria-label]="priceLabel()">
+    <p class="product-card__pricing">
+      <span class="visually-hidden">{{ priceLabel() }}</span>
       @if (product().discountPercentage > 0) {
         <span class="product-card__original-price" aria-hidden="true">
           ${{ product().price | number: '1.0-2' }} USD
@@ -45,7 +47,8 @@
       </div>
     </dl>
 
-    <p class="product-card__rating" [attr.aria-label]="ratingLabel()">
+    <p class="product-card__rating">
+      <span class="visually-hidden">{{ ratingLabel() }}</span>
       <span class="product-card__star" aria-hidden="true">★</span>
       <strong aria-hidden="true">{{ product().rating | number: '1.0-2' }}</strong>
       @if (reviewCount() !== null) {

@@ -57,16 +57,31 @@ describe('ProductCard', () => {
     expect(image.width).toBe(282);
     expect(image.height).toBe(257);
     expect(image.getAttribute('loading')).toBe('lazy');
+    expect(image.getAttribute('fetchpriority')).toBe('auto');
   });
 
-  it('exposes meaningful price and rating descriptions', () => {
+  it('exposes meaningful price and rating descriptions without prohibited ARIA', () => {
     const pricing = fixture.nativeElement.querySelector('.product-card__pricing') as HTMLElement;
     const rating = fixture.nativeElement.querySelector('.product-card__rating') as HTMLElement;
 
-    expect(pricing.getAttribute('aria-label')).toBe(
+    expect(pricing.getAttribute('aria-label')).toBeNull();
+    expect(pricing.querySelector('.visually-hidden')?.textContent).toContain(
       'Original price 549 US dollars; discounted price 477.85 US dollars',
     );
-    expect(rating.getAttribute('aria-label')).toBe('Rated 4.69 out of 5 from 1 review');
+    expect(rating.getAttribute('aria-label')).toBeNull();
+    expect(rating.querySelector('.visually-hidden')?.textContent).toContain(
+      'Rated 4.69 out of 5 from 1 review',
+    );
+  });
+
+  it('prioritizes only a card explicitly marked as the LCP candidate', () => {
+    fixture.componentRef.setInput('priority', true);
+    fixture.detectChanges();
+
+    const image = fixture.nativeElement.querySelector('img') as HTMLImageElement;
+
+    expect(image.getAttribute('loading')).toBe('eager');
+    expect(image.getAttribute('fetchpriority')).toBe('high');
   });
 
   it('emits the product ID as add-to-cart intent', () => {
