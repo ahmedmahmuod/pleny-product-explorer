@@ -132,7 +132,6 @@ export const CartStore = signalStore(
       isProductInCart(productId: number): boolean {
         return store.cartProductIds().includes(productId);
       },
-
     };
   }),
 );
@@ -162,10 +161,7 @@ function removeProductId(productIds: readonly number[], productId: number): read
 function getCartErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof HttpErrorResponse && isRecord(error.error)) {
     const message = error.error['message'];
-
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
+    if (typeof message === 'string' && message.trim()) return message;
   }
 
   return fallback;

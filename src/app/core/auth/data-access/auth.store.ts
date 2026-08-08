@@ -1,13 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject } from '@angular/core';
-import {
-  patchState,
-  signalStore,
-  withComputed,
-  withHooks,
-  withMethods,
-  withState,
-} from '@ngrx/signals';
+import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { catchError, EMPTY, exhaustMap, finalize, pipe, tap } from 'rxjs';
 
@@ -42,6 +35,7 @@ export const AuthStore = signalStore(
   withMethods((store) => {
     const authApi = inject(AuthApiService);
     const sessionStorage = inject(AuthSessionStorage);
+
     const login = rxMethod<AuthCredentials>(
       pipe(
         exhaustMap((credentials) => {
@@ -80,10 +74,7 @@ export const AuthStore = signalStore(
 
       updateTokens(tokens: AuthTokens): void {
         const currentSession = store.session();
-
-        if (!currentSession) {
-          return;
-        }
+        if (!currentSession) return;
 
         const session: AuthSession = { ...currentSession, ...tokens };
         sessionStorage.write(session);
@@ -101,10 +92,7 @@ export const AuthStore = signalStore(
 function getLoginErrorMessage(error: unknown): string {
   if (error instanceof HttpErrorResponse && isRecord(error.error)) {
     const message = error.error['message'];
-
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
+    if (typeof message === 'string' && message.trim()) return message;
   }
 
   return 'Unable to sign in. Please try again.';

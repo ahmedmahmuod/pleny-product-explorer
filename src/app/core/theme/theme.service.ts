@@ -11,10 +11,10 @@ export class ThemeService {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   private readonly mediaQuery = this.getMediaQuery();
-  private readonly systemTheme = signal<Theme>(this.mediaQuery?.matches ? 'dark' : 'light');
-  private readonly preference = signal<ThemePreference>(this.readPreference());
+  private readonly systemTheme = signal(this.mediaQuery?.matches ? 'dark' : 'light');
+  private readonly preference = signal(this.readPreference());
 
-  readonly theme = computed<Theme>(() => {
+  readonly theme = computed(() => {
     const preference = this.preference();
     return preference === 'system' ? this.systemTheme() : preference;
   });
@@ -23,17 +23,13 @@ export class ThemeService {
   // Theme choice changes the browser document and storage, which are true external side effects.
   private readonly synchronizeTheme = effect(() => {
     const preference = this.preference();
-
     this.document.documentElement.dataset['theme'] = this.theme();
     this.writePreference(preference);
   });
 
   constructor() {
     const mediaQuery = this.mediaQuery;
-
-    if (!mediaQuery) {
-      return;
-    }
+    if (!mediaQuery) return;
 
     const updateSystemTheme = ({ matches }: MediaQueryListEvent): void => {
       this.systemTheme.set(matches ? 'dark' : 'light');
@@ -57,9 +53,7 @@ export class ThemeService {
   private readPreference(): ThemePreference {
     try {
       const storedPreference = this.document.defaultView?.localStorage.getItem(THEME_STORAGE_KEY);
-      return storedPreference === 'light' || storedPreference === 'dark'
-        ? storedPreference
-        : 'system';
+      return storedPreference === 'light' || storedPreference === 'dark' ? storedPreference : 'system';
     } catch {
       return 'system';
     }
